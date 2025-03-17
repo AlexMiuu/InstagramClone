@@ -1,0 +1,78 @@
+package proiect.proiectPs.entity;
+
+import jakarta.persistence.*;
+
+import java.util.Date;
+
+
+@Entity
+@Table(name = "User")
+public class User {
+
+    @Id
+    @Column(name = "id")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(name = "email")
+    private String email;
+
+    @Column(name = "date_of_birth")
+    private Date date_of_birth;
+
+    @Column(name = "is_admin")
+    private boolean is_admin;
+
+    @Column(name = "is_blocked")
+    private boolean is_blocked;
+
+    public User(){}
+
+    public User(Long id, String email, Date date_of_birth, boolean is_admin, boolean is_blocked) {
+        this.id = id;
+        this.email = email;
+        this.date_of_birth = date_of_birth;
+        this.is_admin = is_admin;
+        this.is_blocked = is_blocked;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public Date getDate_of_birth() {
+        return date_of_birth;
+    }
+
+    public void setDate_of_birth(Date date_of_birth) {
+        this.date_of_birth = date_of_birth;
+    }
+
+    public boolean isIs_admin() {
+        return is_admin;
+    }
+
+    public void setIs_admin(boolean is_admin) {
+        this.is_admin = is_admin;
+    }
+
+    public boolean isIs_blocked() {
+        return is_blocked;
+    }
+
+    public void setIs_blocked(boolean is_blocked) {
+        this.is_blocked = is_blocked;
+    }
+}
