@@ -1,0 +1,30 @@
+img {
+  max-width: 250px;
+  height: 500px;
+  display: block;
+  margin-right: 32px;
+  object-fit: contain;
+
+}
+
+/* Container for the banner image */
+:host {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  height: 100%;
+  padding-right: 1rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 935px) {
+  img {
+    max-width: 320px;
+  }
+}
+
+@media (max-width: 875px) {
+  :host {
+    display: none; /* Hide on smaller screens */
+  }
+}
