@@ -1,0 +1,86 @@
+.header-container {
+  padding: 10px 0;
+  background-color: #000;
+  border-bottom: 1px solid #262626;
+}
+
+/* Custom menubar styles */
+:host ::ng-deep .custom-menubar {
+  background-color: transparent;
+  border: none;
+  padding: 0 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Remove default menubar styles */
+:host ::ng-deep .p-menubar .p-menubar-root-list {
+  display: none;
+}
+
+/* Logo styles */
+.logo-container {
+  display: flex;
+  align-items: center;
+}
+
+.instagram-logo {
+  font-family: 'Grand Hotel', cursive;
+  font-size: 1.8rem;
+  color: white;
+  margin-right: 20px;
+}
+
+/* Search bar styles */
+.search-container {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 268px;
+}
+
+:host ::ng-deep .search-input {
+  background-color: #262626;
+  border: none;
+  border-radius: 8px;
+  height: 36px;
+  width: 100%;
+  color: #fff;
+}
+
+:host ::ng-deep .pi-search {
+  color: #8e8e8e;
+}
+
+/* Icons styles */
+.icons-container {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+:host ::ng-deep .large-icon .p-button-icon {
+  font-size: 1.5rem;
+  color: white;
+}
+
+:host ::ng-deep .p-button.p-button-text {
+  color: white;
+  padding: 0.5rem;
+}
+
+:host ::ng-deep .p-button.p-button-text:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+  .search-container {
+    display: none;
+  }
+  
+  :host ::ng-deep .custom-menubar {
+    justify-content: space-between;
+  }
+}

@@ -1,5 +1,11 @@
 /* You can add global styles to this file, and also import other style files */
 
 /* PrimeNG */
-
+@import "primeicons/primeicons.css";
 /* Global styles */
+body {  
+    font-family: 'Roboto', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #262525;
+}

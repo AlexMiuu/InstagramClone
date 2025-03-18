@@ -104,17 +104,25 @@
   }
 
   .signup-link {
-    font-size: 1rem;
-    
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    padding: 0;
+    font-size: 0.9rem;
   }
 
   .signup-link p {
-    color: #262626;
+    color: #e2d5d5;
+    margin: 0;
+    text-align: center;
   }
 
   .signup-link a {
     color: #0095f6;
     font-weight: 600;
+    text-decoration: none;
+    margin-left: 5px;
   }
 
   .signup-link a:hover {
