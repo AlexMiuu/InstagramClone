@@ -3,35 +3,41 @@ package proiect.proiectPs.entity;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "User_voted_Post")
+@Table(name = "user_voted_post")
 public class UserVotedPost {
 
-    @Id
-    @Column(name = "vote_type")
-    private boolean vote_type;
+    @EmbeddedId
+    private  UserVotedPostId id = new UserVotedPostId();
 
-    @OneToOne()
+    @ManyToOne
+    @MapsId("userId")
     @JoinColumn(name = "id")
     private User user;
 
-    @OneToOne()
+    @ManyToOne
+    @MapsId("postId")
     @JoinColumn(name = "id")
     private Post post;
 
-    public UserVotedPost() {}
+    @Column(name="vote")
+    private int vote;
 
-    public UserVotedPost(boolean vote_type, User user, Post post) {
-        this.vote_type = vote_type;
+    public UserVotedPost(UserVotedPostId id, User user, Post post, int vote) {
+        this.id = id;
         this.user = user;
         this.post = post;
+        this.vote = vote;
     }
 
-    public boolean isVote_type() {
-        return vote_type;
+    public UserVotedPost() {
     }
 
-    public void setVote_type(boolean vote_type) {
-        this.vote_type = vote_type;
+    public UserVotedPostId getId() {
+        return id;
+    }
+
+    public void setId(UserVotedPostId id) {
+        this.id = id;
     }
 
     public User getUser() {
@@ -50,5 +56,11 @@ public class UserVotedPost {
         this.post = post;
     }
 
+    public int getVote() {
+        return vote;
+    }
 
+    public void setVote(int vote) {
+        this.vote = vote;
+    }
 }

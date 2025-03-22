@@ -1,19 +1,26 @@
 package proiect.proiectPs.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 
 @Entity
 @Table(name = "Post_hs_Tag")
 public class PostHasTag {
 
-    @OneToOne()
-    @JoinColumn(name = "id")
-    private Post post;
+   @EmbeddedId
+    private PostHasTagId id = new PostHasTagId();
 
-    @OneToOne()
-    @JoinColumn(name = "tag_text")
-    private Tag tag;
+    public PostHasTag() {
+    }
+
+    public PostHasTag(PostHasTagId id) {
+        this.id = id;
+    }
+
+    public PostHasTagId getId() {
+        return id;
+    }
+
+    public void setId(PostHasTagId id) {
+        this.id = id;
+    }
 }

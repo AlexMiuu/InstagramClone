@@ -2,11 +2,13 @@ package proiect.proiectPs.entity;
 
 import jakarta.persistence.*;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 
 @Entity
-@Table(name = "User")
+@Table(name = "user")
 public class User {
 
     @Id

@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import java.util.Date;
 
 @Entity
-@Table(name = "Comment")
+@Table(name = "comment")
 public class Comment {
 
     @Id
@@ -22,8 +22,6 @@ public class Comment {
 
     @Column(name = "text")
     private String text;
-
-    //@Column(name = "image") ?????????????????????
 
     @Column(name = "post_date")
     private Date post_date;
