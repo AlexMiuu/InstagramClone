@@ -1,8 +1,7 @@
 package proiect.proiectPs.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import proiect.proiectPs.entity.Post;
 import proiect.proiectPs.service.PostService;
 
@@ -14,9 +13,27 @@ public class PostController {
     @Autowired
     private PostService postService;
 
-    public List<Post> getAllPosts(){
-        //TODO functie din service de getAllPosts
-        throw new UnsupportedOperationException();
+    @GetMapping("/gelAll")
+    @ResponseBody
+    public List<Post> retrieveAllPosts() {
+        return this.postService.retrievePosts();
+    }
+
+    @PostMapping("/insertPost")
+    @ResponseBody
+    public Post insertPost(@RequestBody Post post) {
+        return this.postService.insertPost(post);
+    }
+
+    @PutMapping("/updatePost")
+    @ResponseBody
+    public Post updatePost(@RequestBody Post post) {
+        return this.postService.insertPost(post);
+    }
+
+    @DeleteMapping("/deletePost")
+    @ResponseBody
+    public String deletePostById(@RequestParam Long id) {
+        return this.postService.deletePostById(id);
     }
 }
-
