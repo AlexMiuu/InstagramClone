@@ -36,8 +36,7 @@ public class Post {
     private Date post_date;
 
     @Column(name = "image")
-    @Lob
-    private byte[] image;
+    private String image_link;
 
     public Post() {}
 

@@ -28,5 +28,4 @@ public class CommentService {
             return "Failed deleting the comment with the id " + id;
         }
     }
-
 }
