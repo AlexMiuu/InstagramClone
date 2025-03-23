@@ -3,7 +3,7 @@ package proiect.proiectPs.entity;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "Post_hs_Tag")
+@Table(name = "Post_has_Tag")
 public class PostHasTag {
 
    @EmbeddedId

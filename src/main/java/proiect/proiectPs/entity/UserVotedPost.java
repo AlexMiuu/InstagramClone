@@ -1,6 +1,12 @@
 package proiect.proiectPs.entity;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.EmbeddedId;
+import jakarta.persistence.Entity;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.MapsId;
+import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "user_voted_post")
@@ -11,12 +17,12 @@ public class UserVotedPost {
 
     @ManyToOne
     @MapsId("userId")
-    @JoinColumn(name = "id")
+    @JoinColumn(name = "user_id") // Fixed column name from "id" to "user_id"
     private User user;
 
     @ManyToOne
     @MapsId("postId")
-    @JoinColumn(name = "id")
+    @JoinColumn(name = "post_id") // Fixed column name from "id" to "post_id"
     private Post post;
 
     @Column(name="vote")

@@ -1,7 +1,15 @@
 package proiect.proiectPs.entity;
 
-import jakarta.persistence.*;
 import java.util.Date;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "comment")
@@ -13,11 +21,11 @@ public class Comment {
     private Long id;
 
     @ManyToOne()
-    @JoinColumn(name = "id")
+    @JoinColumn(name = "user_id") // Fixed column name from "id" to "user_id"
     private User user;
 
     @ManyToOne
-    @JoinColumn(name = "id")
+    @JoinColumn(name = "post_id") // Fixed column name from "id" to "post_id"
     private Post post;
 
     @Column(name = "text")

@@ -1,6 +1,12 @@
 package proiect.proiectPs.entity;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.EmbeddedId;
+import jakarta.persistence.Entity;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.MapsId;
+import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "user_voted_comment")
@@ -12,13 +18,13 @@ public class UserVotedComment {
     // Many-to-one association with User; maps the userId field from the composite key
     @ManyToOne
     @MapsId("userId")
-    @JoinColumn(name = "id")
+    @JoinColumn(name = "user_id") // Fixed column name from "id" to "user_id"
     private User user;
 
     // Many-to-one association with Comment; maps the commentId field from the composite key
     @ManyToOne
     @MapsId("commentId")
-    @JoinColumn(name = "id")
+    @JoinColumn(name = "comment_id") // Fixed column name from "id" to "comment_id"
     private Comment comment;
 
     // Extra field to store vote information: e.g., +1 for upvote, -1 for downvote.
