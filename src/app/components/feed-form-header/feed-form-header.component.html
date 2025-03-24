@@ -1,0 +1,26 @@
+<div class="header-container">
+    <p-menubar [model]="items" styleClass="custom-menubar">
+        <ng-template pTemplate="start">
+            <div class="logo-container">
+                <span class="instagram-logo">Instagram</span>
+            </div>
+        </ng-template>
+
+        <ng-template pTemplate="center">
+            <div class="search-container">
+                <span class="p-input-icon-left">
+                    <i class="pi pi-search"></i>
+                    <input type="text" pInputText placeholder="Search" class="search-input" />
+                </span>
+            </div>
+        </ng-template>
+        
+        <ng-template pTemplate="end">
+            <div class="icons-container">
+                <ng-container *ngFor="let item of items">
+                    <button pButton [icon]="item.icon" class="p-button-rounded p-button-text large-icon"></button>
+                </ng-container>
+            </div>
+        </ng-template>
+    </p-menubar>    
+</div>
