@@ -1,0 +1,113 @@
+.header-container {
+  padding: 10px 0;
+  background-color: #000;
+  border-bottom: 1px solid #262626;
+  /* Add purple tint */
+  box-shadow: 0 2px 10px rgba(138, 43, 226, 0.2);
+}
+
+/* Custom menubar styles */
+:host ::ng-deep .custom-menubar {
+  background-color: transparent;
+  border: none;
+  padding: 0 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Remove default menubar styles */
+:host ::ng-deep .p-menubar .p-menubar-root-list {
+  display: none;
+}
+
+/* Logo styles */
+.logo-container {
+  display: flex;
+  align-items: center;
+}
+
+.instagram-logo {
+  font-family: "Grand Hotel", cursive;
+  font-size: 1.8rem;
+  color: white;
+  margin-right: 1rem;
+  /* Add purple tint */
+  text-shadow: 0 0 10px rgba(138, 43, 226, 0.5);
+}
+
+/* Icons styles */
+.icons-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+:host ::ng-deep .large-icon .p-button-icon {
+  font-size: 1.5rem;
+  color: white;
+}
+
+:host ::ng-deep .p-button.p-button-text {
+  color: white;
+  padding: 0.5rem;
+}
+
+:host ::ng-deep .p-button.p-button-text:hover {
+  background-color: rgba(138, 43, 226, 0.2); /* Purple tint */
+}
+
+.search-container {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 268px;
+}
+
+/* Search bar styling */
+.search-input {
+  background-color: #262626;
+  border: none;
+  border-radius: 8px;
+  height: 36px;
+  width: 100%;
+  color: #fff;
+  padding-left: 2.5rem;
+  /* Add purple focus */
+  transition: all 0.3s ease;
+}
+
+.search-input:focus {
+  box-shadow: 0 0 0 2px rgba(138, 43, 226, 0.4);
+  background-color: #333;
+}
+
+:host ::ng-deep .p-input-icon-left i {
+  color: #8e8e8e;
+  left: 0.75rem;
+}
+
+:host ::ng-deep .p-inputtext:enabled:focus {
+  box-shadow: 0 0 0 2px rgba(138, 43, 226, 0.4);
+  border-color: #8a2be2;
+}
+
+/* Active icon styling */
+:host ::ng-deep .p-button.active {
+  color: #8a2be2;
+}
+
+:host ::ng-deep .p-button.active .p-button-icon {
+  color: #8a2be2;
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+  .search-container {
+    display: none;
+  }
+
+  :host ::ng-deep .custom-menubar {
+    justify-content: space-between;
+  }
+}

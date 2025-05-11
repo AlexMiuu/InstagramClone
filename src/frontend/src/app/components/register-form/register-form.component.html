@@ -1,0 +1,81 @@
+<form [formGroup]="registerForm">
+<div class="login-form-container">
+    <p-card [style]="{ width: '25rem', overflow: 'hidden' }">
+        <ng-template pTemplate="header">
+            <p class="header-container">Instagram</p>
+        </ng-template>
+    
+        <p>
+             <p-floatlabel  variant="on">
+                <input 
+                pInputText id="email" 
+                formControlName="email" 
+                autocomplete="off" 
+                type="email"
+                />
+                <label for="email">Email</label>
+            </p-floatlabel>
+            <small *ngIf="registerForm.get('email')?.invalid && registerForm.get('email')?.touched" class="p-error">
+                Please enter a valid email address
+            </small>
+        </p>
+           
+        <p>
+             <p-floatlabel variant="on">
+                <input pInputText id="password" formControlName="password" type="password" autocomplete="off" />
+                <label for="password">Password</label>
+            </p-floatlabel>
+            <small *ngIf="registerForm.get('password')?.invalid && registerForm.get('password')?.touched" class="p-error">
+                Password must be at least 6 characters
+            </small>
+        </p>
+        
+        <p>
+            <p-floatlabel variant="on">
+               <input pInputText id="fullName" formControlName="fullName" autocomplete="off" />
+               <label for="fullName">Full Name</label>
+           </p-floatlabel>
+           <small *ngIf="registerForm.get('fullName')?.invalid && registerForm.get('fullName')?.touched" class="p-error">
+                Full name is required
+            </small>
+       </p>
+
+
+       <p>
+        <p-floatlabel variant="on">
+           <input pInputText id="username" formControlName="username" autocomplete="off" />
+           <label for="username">Username</label>
+       </p-floatlabel>
+       <small *ngIf="registerForm.get('username')?.invalid && registerForm.get('username')?.touched" class="p-error">
+            Username must contain only letters, numbers, periods, and underscores
+        </small>
+        </p>
+
+    <p class="terms-of-use">
+        It is possible that people who use our service may have uploaded your contact information to Instagram.
+    </p>
+    
+
+    <p class="terms-of-use">
+        If you sign up, you express your agreement with the Terms of Use. From the Privacy Policy, you can find out how we collect, use, and transmit your data, and from the Cookie Policy, you can find out how we use cookies and similar technologies.
+    </p>
+    
+        <div class="flex gap-4 mt-1">
+            <p-button label="Next" severity="secondary" class="w-full" [outlined]="true" styleClass="w-full" (click)="onRegister()"></p-button>
+         </div>
+    
+  
+        
+    </p-card>
+    
+  
+    
+    <p-card [style]="{ width: '25rem', overflow: 'hidden', height: '5rem', marginTop: '1rem' }">
+        <div class="signup-link">
+            <p>Have an account?</p> 
+            <a href="login">Log in</a>
+        </div>
+    </p-card>
+    
+    </div>
+</form>
