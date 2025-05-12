@@ -1,0 +1,489 @@
+.profile-container {
+  max-width: 935px;
+  margin: 0 auto;
+  padding: 30px 20px;
+  color: #fff;
+}
+
+.profile-content {
+  display: flex;
+  background-color: #121212;
+  border: 1px solid #262626;
+  border-radius: 4px;
+  /* Add purple tint */
+  box-shadow: 0 0 15px rgba(138, 43, 226, 0.2);
+}
+
+/* Sidebar Styles */
+.profile-sidebar {
+  width: 236px;
+  border-right: 1px solid #262626;
+  padding: 0;
+}
+
+.sidebar-menu {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.sidebar-menu li {
+  padding: 16px 16px 16px 30px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.2s;
+}
+
+.sidebar-menu li:hover {
+  background-color: rgba(138, 43, 226, 0.1); /* Purple tint */
+}
+
+.sidebar-menu li.active {
+  border-left: 2px solid #8a2be2; /* Purple color */
+  font-weight: 600;
+  background-color: rgba(138, 43, 226, 0.15);
+}
+
+/* Main Content Styles */
+.profile-main {
+  flex: 1;
+  padding: 30px;
+}
+
+/* Profile Header */
+.profile-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 32px;
+}
+
+.profile-avatar-container {
+  margin-right: 32px;
+}
+
+.profile-name-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.username {
+  margin: 0 0 8px 0;
+  font-size: 20px;
+  font-weight: 400;
+}
+
+.change-photo-btn {
+  padding: 0;
+  color: #8a2be2; /* Purple color */
+  font-weight: 600;
+}
+
+/* Profile Avatar */
+.profile-avatar {
+  margin-right: 30px;
+  flex-shrink: 0;
+}
+
+.profile-info {
+  flex: 1;
+}
+
+.profile-username-section {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.profile-username {
+  font-size: 28px;
+  font-weight: 300;
+  margin: 0;
+  margin-right: 8px;
+}
+
+.verified-badge {
+  color: #8a2be2; /* Purple color */
+  font-size: 18px;
+  margin-right: 20px;
+}
+
+.edit-profile-btn {
+  margin-right: 10px;
+  background-color: transparent;
+  border-color: #8a2be2; /* Purple color */
+  color: #fff;
+}
+
+.settings-btn {
+  color: #fff;
+}
+
+/* Profile Stats */
+.profile-stats {
+  display: flex;
+  margin-bottom: 20px;
+}
+
+.stat-item {
+  margin-right: 40px;
+  font-size: 16px;
+}
+
+.stat-count {
+  font-weight: 600;
+  margin-right: 5px;
+}
+
+.stat-label {
+  color: #fff;
+}
+
+/* Profile Bio */
+.profile-bio {
+  max-width: 400px;
+}
+
+.profile-name {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0 0 5px 0;
+}
+
+.bio-text {
+  margin: 0 0 5px 0;
+  white-space: pre-line;
+}
+
+.website-link {
+  color: #8a2be2; /* Purple color */
+  font-weight: 600;
+  text-decoration: none;
+}
+
+/* Story Highlights */
+.story-highlights {
+  display: flex;
+  overflow-x: auto;
+  padding: 10px 0;
+  margin-bottom: 20px;
+}
+
+.highlight-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-right: 25px;
+}
+
+.highlight-circle {
+  width: 77px;
+  height: 77px;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 8px;
+  border: 1px solid #8a2be2; /* Purple color */
+  padding: 3px;
+}
+
+.highlight-label {
+  font-size: 12px;
+  color: #fff;
+  max-width: 74px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: center;
+}
+
+/* Posts Grid */
+.posts-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 28px;
+  margin-top: 20px;
+}
+
+.post-item {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.post-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.post-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(138, 43, 226, 0.3); /* Purple tint */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.post-item:hover .post-overlay {
+  opacity: 1;
+}
+
+.post-stats {
+  display: flex;
+  color: white;
+  font-weight: 600;
+}
+
+.post-stats span {
+  margin: 0 10px;
+  display: flex;
+  align-items: center;
+}
+
+.post-stats i {
+  margin-right: 7px;
+}
+
+/* Edit Profile Dialog */
+.edit-profile-form {
+  padding: 16px 0;
+}
+
+.profile-picture-edit {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.change-photo-text {
+  margin-left: 20px;
+  color: #8a2be2; /* Purple color */
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.form-field {
+  margin-bottom: 16px;
+}
+
+.form-field label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+
+/* Form Styles */
+.profile-form {
+  max-width: 500px;
+}
+
+.form-group {
+  margin-bottom: 16px;
+  display: flex;
+  flex-direction: column;
+}
+
+.form-group label {
+  font-weight: 600;
+  margin-bottom: 8px;
+  font-size: 16px;
+}
+
+.form-control {
+  background-color: #262626;
+  border: 1px solid #262626;
+  color: #fff;
+  padding: 8px 12px;
+  border-radius: 4px;
+}
+
+.form-control:focus {
+  border-color: #8a2be2; /* Purple color */
+  box-shadow: 0 0 0 2px rgba(138, 43, 226, 0.25);
+}
+
+.form-help {
+  color: #8e8e8e;
+  font-size: 12px;
+  margin-top: 8px;
+}
+
+.form-actions {
+  margin-top: 24px;
+}
+
+.submit-btn {
+  background-color: #8a2be2; /* Purple color */
+  border-color: #8a2be2;
+}
+
+/* Privacy Section */
+.privacy-section h2 {
+  margin-bottom: 24px;
+}
+
+.privacy-card {
+  margin-bottom: 16px;
+}
+
+.privacy-option {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.option-label h4 {
+  margin: 0 0 8px 0;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.option-label p {
+  margin: 0;
+  color: #8e8e8e;
+  font-size: 14px;
+}
+
+/* Tab customization */
+:host ::ng-deep .p-tabview .p-tabview-nav {
+  justify-content: center;
+  border-color: #262626;
+}
+
+:host ::ng-deep .p-tabview .p-tabview-nav li .p-tabview-nav-link {
+  color: #8e8e8e;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid transparent;
+  transition: color 0.2s;
+  text-transform: uppercase;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 1px;
+}
+
+:host ::ng-deep .p-tabview .p-tabview-nav li.p-highlight .p-tabview-nav-link {
+  color: #8a2be2; /* Purple color */
+  border-color: #8a2be2;
+}
+
+:host ::ng-deep .p-tabview .p-tabview-panels {
+  background: transparent;
+  border: none;
+  padding: 0;
+}
+
+:host ::ng-deep .p-tabview .p-tabview-nav li .p-tabview-nav-link:not(.p-disabled):focus {
+  box-shadow: none;
+}
+
+/* PrimeNG Overrides */
+:host ::ng-deep .p-card {
+  background-color: #1a1a1a;
+  color: #fff;
+  border: 1px solid #262626;
+}
+
+:host ::ng-deep .p-card .p-card-title {
+  color: #fff;
+}
+
+:host ::ng-deep .p-card .p-card-content {
+  padding: 16px;
+}
+
+:host ::ng-deep .p-inputtext:enabled:focus {
+  box-shadow: 0 0 0 1px #8a2be2; /* Purple color */
+  border-color: #8a2be2;
+}
+
+:host ::ng-deep .p-button.p-button-outlined {
+  color: #8a2be2; /* Purple color */
+  border-color: #8a2be2;
+}
+
+:host ::ng-deep .p-divider .p-divider-content {
+  background-color: #121212;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .profile-content {
+    flex-direction: column;
+  }
+
+  .profile-sidebar {
+    width: 100%;
+    border-right: none;
+    border-bottom: 1px solid #262626;
+  }
+
+  .sidebar-menu {
+    display: flex;
+    overflow-x: auto;
+  }
+
+  .sidebar-menu li {
+    padding: 16px;
+    white-space: nowrap;
+  }
+
+  .sidebar-menu li.active {
+    border-left: none;
+    border-bottom: 2px solid #8a2be2; /* Purple color */
+  }
+
+  .profile-header {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .profile-avatar-container {
+    margin-right: 0;
+    margin-bottom: 16px;
+  }
+}
+
+@media (max-width: 735px) {
+  .profile-header {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .profile-avatar {
+    margin-right: 0;
+    margin-bottom: 20px;
+  }
+
+  .profile-username-section {
+    flex-direction: column;
+  }
+
+  .profile-stats {
+    justify-content: center;
+  }
+
+  .profile-bio {
+    text-align: center;
+    margin: 0 auto;
+  }
+
+  .posts-grid {
+    gap: 3px;
+  }
+}
+
+@media (max-width: 500px) {
+  .posts-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}

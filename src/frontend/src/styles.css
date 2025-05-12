@@ -1,0 +1,90 @@
+/* You can add global styles to this file, and also import other style files */
+
+/* PrimeNG */
+@import "primeicons/primeicons.css";
+/* Global styles */
+body {
+  font-family: "Roboto", sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #262525;
+}
+
+/* Purple theme colors */
+:root {
+  --primary-purple: #8a2be2;
+  --primary-purple-dark: #6a1cb2;
+  --primary-purple-light: #9d4eed;
+  --primary-purple-bg: rgba(138, 43, 226, 0.1);
+  --primary-purple-border: rgba(138, 43, 226, 0.3);
+}
+
+/* Override PrimeNG button colors */
+.p-button.p-button-outlined.purple-button {
+  color: var(--primary-purple);
+  border-color: var(--primary-purple);
+}
+
+.p-button.p-button-outlined.purple-button:hover {
+  background-color: var(--primary-purple-bg);
+  border-color: var(--primary-purple);
+}
+
+.p-button.purple-button {
+  background-color: var(--primary-purple);
+  border-color: var(--primary-purple);
+}
+
+.p-button.purple-button:hover {
+  background-color: var(--primary-purple-dark);
+  border-color: var(--primary-purple-dark);
+}
+
+/* Dialog styling */
+.p-dialog .p-dialog-header {
+  background-color: var(--primary-purple-bg);
+  border-bottom: 1px solid var(--primary-purple-border);
+}
+
+.p-dialog .p-dialog-footer {
+  background-color: var(--primary-purple-bg);
+  border-top: 1px solid var(--primary-purple-border);
+}
+
+/* Custom file upload button */
+.custom-file-upload {
+  display: inline-block;
+  padding: 10px 15px;
+  cursor: pointer;
+  background-color: var(--primary-purple);
+  color: white;
+  border-radius: 4px;
+  text-align: center;
+  transition: background-color 0.3s;
+}
+
+.custom-file-upload:hover {
+  background-color: var(--primary-purple-dark);
+}
+
+.file-upload-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.file-name {
+  font-size: 0.9rem;
+  color: #ccc;
+  margin-top: 5px;
+}
+
+/* Filter bar styling */
+.filter-section {
+  background-color: var(--primary-purple-bg) !important;
+  border: 1px solid var(--primary-purple-border) !important;
+  border-radius: 8px !important;
+  padding: 15px !important;
+}
