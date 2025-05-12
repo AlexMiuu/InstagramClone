@@ -20,12 +20,12 @@ public class Comment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne()
-    @JoinColumn(name = "user_id") // Fixed column name from "id" to "user_id"
+    @ManyToOne
+    @JoinColumn(name = "user_id")
     private User user;
 
     @ManyToOne
-    @JoinColumn(name = "post_id") // Fixed column name from "id" to "post_id"
+    @JoinColumn(name = "post_id")
     private Post post;
 
     @Column(name = "text")
