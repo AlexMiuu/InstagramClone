@@ -1,4 +1,4 @@
-<form [formGroup]="registerForm">
+<form [formGroup]="registerForm" (ngSubmit)="onRegister()">
 <div class="login-form-container">
     <p-card [style]="{ width: '25rem', overflow: 'hidden' }">
         <ng-template pTemplate="header">
@@ -32,22 +32,21 @@
         
         <p>
             <p-floatlabel variant="on">
-               <input pInputText id="fullName" formControlName="fullName" autocomplete="off" />
-               <label for="fullName">Full Name</label>
+               <input pInputText id="confirmPassword" formControlName="confirmPassword" autocomplete="off" />
+               <label for="confirmPassword">confirmPassword</label>
            </p-floatlabel>
-           <small *ngIf="registerForm.get('fullName')?.invalid && registerForm.get('fullName')?.touched" class="p-error">
-                Full name is required
+           <small *ngIf="registerForm.get('confirmPassword')?.invalid && registerForm.get('confirmPassword')?.touched" class="p-error">
+                confirmPassword is required
             </small>
        </p>
 
-
        <p>
         <p-floatlabel variant="on">
-           <input pInputText id="username" formControlName="username" autocomplete="off" />
-           <label for="username">Username</label>
+           <input pInputText id="dateOfBirth" formControlName="dateOfBirth" autocomplete="off" />
+           <label for="dateOfBirth">dateOfBirth</label>
        </p-floatlabel>
-       <small *ngIf="registerForm.get('username')?.invalid && registerForm.get('username')?.touched" class="p-error">
-            Username must contain only letters, numbers, periods, and underscores
+       <small *ngIf="registerForm.get('dateOfBirth')?.invalid && registerForm.get('dateOfBirth')?.touched" class="p-error">
+             dateOfBirth is required
         </small>
         </p>
 
@@ -55,20 +54,23 @@
         It is possible that people who use our service may have uploaded your contact information to Instagram.
     </p>
     
-
     <p class="terms-of-use">
         If you sign up, you express your agreement with the Terms of Use. From the Privacy Policy, you can find out how we collect, use, and transmit your data, and from the Cookie Policy, you can find out how we use cookies and similar technologies.
     </p>
     
         <div class="flex gap-4 mt-1">
-            <p-button label="Next" severity="secondary" class="w-full" [outlined]="true" styleClass="w-full" (click)="onRegister()"></p-button>
+            <p-button 
+                label="Sign Up" 
+                severity="secondary" 
+                class="w-full" 
+                [outlined]="true" 
+                styleClass="w-full purple-button" 
+                [loading]="isLoading"
+                type="submit"
+                [disabled]="registerForm.invalid">
+            </p-button>
          </div>
-    
-  
-        
     </p-card>
-    
-  
     
     <p-card [style]="{ width: '25rem', overflow: 'hidden', height: '5rem', marginTop: '1rem' }">
         <div class="signup-link">
@@ -77,5 +79,7 @@
         </div>
     </p-card>
     
-    </div>
+</div>
+
+<p-toast></p-toast>
 </form>

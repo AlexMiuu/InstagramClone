@@ -12,7 +12,12 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.servlet.handler.HandlerMappingIntrospector;
+
+import java.util.Arrays;
 
 @Configuration
 public class SecurityConfig {
@@ -53,6 +58,25 @@ public class SecurityConfig {
 
         http.addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
+    }
+
+
+    @Bean
+    CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        // IMPORTANT: Specify the exact origin of your frontend application
+        configuration.setAllowedOrigins(Arrays.asList("http://localhost:4200"));
+        // Specify which HTTP methods are allowed
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        // Specify which headers are allowed
+        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type"));
+        // Allow credentials (e.g., cookies, authorization headers)
+        configuration.setAllowCredentials(true);
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        // Apply this configuration to all paths in your application
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
     }
 //*/
 /*

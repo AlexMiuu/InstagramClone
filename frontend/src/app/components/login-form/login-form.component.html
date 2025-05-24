@@ -1,4 +1,4 @@
-<form [formGroup]="loginForm">
+<form [formGroup]="loginForm" (ngSubmit)="onLogin()">
 <div class="login-form-container">
 <p-card [style]="{ width: '25rem', overflow: 'hidden' }">
     <ng-template pTemplate="header">
@@ -14,6 +14,9 @@
             />
             <label for="email">Username, email or phone number</label>
         </p-floatlabel>
+        <small *ngIf="loginForm.get('email')?.invalid && loginForm.get('email')?.touched" class="p-error">
+            Please enter a valid email address
+        </small>
     </p>
        
     <p>
@@ -26,11 +29,23 @@
             />
             <label for="password">Password</label>
         </p-floatlabel>
+        <small *ngIf="loginForm.get('password')?.invalid && loginForm.get('password')?.touched" class="p-error">
+            Password is required
+        </small>
     </p>
     
 
     <div class="flex gap-4 mt-1">
-        <p-button label="Log In" severity="secondary" class="w-full" [outlined]="true" styleClass="w-full"></p-button>
+        <p-button 
+            label="Log In" 
+            severity="secondary" 
+            class="w-full" 
+            [outlined]="true" 
+            styleClass="w-full purple-button"
+            [loading]="isLoading"
+            type="submit"
+            [disabled]="loginForm.invalid">
+        </p-button>
     </div>
 
 
@@ -38,18 +53,12 @@
         <b>OR</b>
     </p-divider>
 
-  
-
     <ng-template pTemplate="footer">
         <div class="footer-container">
              <a href="#">Forgot password?</a>
         </div>
-       
     </ng-template>
-
-    
 </p-card>
-
 
 <p-card [style]="{ width: '25rem', overflow: 'hidden', height: '5rem', marginTop: '1rem' }">
     <div class="signup-link" >
@@ -58,4 +67,6 @@
 </p-card>
 
 </div>
+
+<p-toast></p-toast>
 </form>
