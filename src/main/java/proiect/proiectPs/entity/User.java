@@ -31,6 +31,9 @@ public class User {
     @Column(name = "is_blocked")
     private boolean is_blocked;
 
+    @Column(name = "password")
+    private String password;
+
     public User(){}
 
     public User(Long id, String email, Date date_of_birth, boolean is_admin, boolean is_blocked) {
@@ -79,5 +82,13 @@ public class User {
 
     public void setIs_blocked(boolean is_blocked) {
         this.is_blocked = is_blocked;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 }
