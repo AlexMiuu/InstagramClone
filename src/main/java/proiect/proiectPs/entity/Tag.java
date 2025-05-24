@@ -13,10 +13,14 @@ public class Tag {
     @Column(name = "tag_text")
     private String tagText;
 
+    @Column(name = "name", nullable = false, unique = true)
+    private String name;
+
     public Tag() {}
 
-    public Tag(String tagText) {
+    public Tag(String tagText, String name) {
         this.tagText = tagText;
+        this.name = name;
     }
 
     public String getTagText() {
@@ -25,5 +29,13 @@ public class Tag {
 
     public void setTagText(String tagText) {
         this.tagText = tagText;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 }

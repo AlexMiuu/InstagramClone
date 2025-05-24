@@ -45,4 +45,34 @@ public class PostController {
     public String deletePostById(@RequestParam Long id) {
         return this.postService.deletePostById(id);
     }
+
+    @PostMapping("/create")
+    @ResponseBody
+    public Post createPost(@RequestBody Post post, @RequestParam List<String> tags) {
+        return this.postService.createPost(post, tags);
+    }
+
+    @PostMapping("/upvote")
+    @ResponseBody
+    public String upvotePost(@RequestParam Long postId, @RequestParam Long userId) {
+        return this.postService.upvotePost(postId, userId);
+    }
+
+    @PutMapping("/edit")
+    @ResponseBody
+    public Post editPost(@RequestParam Long postId, @RequestBody Post post, @RequestParam Long userId) {
+        return this.postService.editPost(postId, post, userId);
+    }
+
+    @GetMapping("/getAllSorted")
+    @ResponseBody
+    public List<Post> getAllPostsSortedByScore() {
+        return this.postService.getAllPostsSortedByScore();
+    }
+
+    @GetMapping("/byTag")
+    @ResponseBody
+    public List<Post> getPostsByTag(@RequestParam String tag) {
+        return this.postService.getPostsByTag(tag);
+    }
 }

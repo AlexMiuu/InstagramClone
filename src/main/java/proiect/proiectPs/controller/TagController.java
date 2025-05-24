@@ -1,11 +1,20 @@
 package proiect.proiectPs.controller;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
+
 import proiect.proiectPs.entity.Tag;
 import proiect.proiectPs.service.TagService;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/tags")
@@ -19,21 +28,27 @@ public class TagController {
         return this.tagService.retrieveAllTags();
     }
 
-    @PostMapping("/insertTag")
+    @GetMapping("/search")
     @ResponseBody
-    public Tag insertTag(@RequestBody Tag tag) {
-        return this.tagService.insertTag(tag);
+    public List<Tag> searchTags(@RequestParam String substring) {
+        return this.tagService.searchTagsBySubstring(substring);
+    }
+
+    @PostMapping("/create")
+    @ResponseBody
+    public Tag createTag(@RequestBody Tag tag) {
+        return this.tagService.insertOrUpdateTag(tag);
     }
 
     @PutMapping("/updateTag")
     @ResponseBody
     public Tag updateTag(@RequestBody Tag tag) {
-        return this.tagService.insertTag(tag);
+        return this.tagService.insertOrUpdateTag(tag);
     }
 
-    @DeleteMapping("/deleteTag")
+    @DeleteMapping("/delete")
     @ResponseBody
-    public String deleteTagById(@RequestParam Long id) {
+    public String deleteTag(@RequestParam Long id) {
         return this.tagService.deleteTagById(id);
     }
 

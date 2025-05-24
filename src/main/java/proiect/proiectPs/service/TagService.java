@@ -1,12 +1,12 @@
 package proiect.proiectPs.service;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import proiect.proiectPs.entity.Post;
+
 import proiect.proiectPs.entity.Tag;
 import proiect.proiectPs.repository.TagRepository;
-
-import java.util.List;
 
 @Service
 public class TagService {
@@ -18,7 +18,22 @@ public class TagService {
     }
 
     public Tag insertTag(Tag tag) {
+        // Check if tag exists, if not create
+        Tag existing = tagRepository.findByName(tag.getTagText());
+        if (existing != null) return existing;
         return this.tagRepository.save(tag);
+    }
+
+    public Tag insertOrUpdateTag(Tag tag) {
+        Tag existing = tagRepository.findByName(tag.getTagText());
+        if (existing != null) {
+            return existing;
+        }
+        return this.tagRepository.save(tag);
+    }
+
+    public List<Tag> searchTagsBySubstring(String substring) {
+        return tagRepository.findByTagTextContainingIgnoreCase(substring);
     }
 
     public String deleteTagById(Long id) {

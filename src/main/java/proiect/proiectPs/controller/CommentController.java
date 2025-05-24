@@ -1,12 +1,20 @@
 package proiect.proiectPs.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
-import proiect.proiectPs.entity.Comment;
-import proiect.proiectPs.entity.Post;
-import proiect.proiectPs.service.CommentService;
-
 import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
+
+import proiect.proiectPs.entity.Comment;
+import proiect.proiectPs.service.CommentService;
 
 @RestController
 @RequestMapping("/comments")
@@ -36,5 +44,29 @@ public class CommentController {
     @ResponseBody
     public String deleteCommentById(@RequestParam Long id) {
         return this.commentService.deleteCommentById(id);
+    }
+
+    @PostMapping("/vote")
+    @ResponseBody
+    public String voteComment(@RequestParam Long commentId, @RequestParam boolean upvote, @RequestParam Long userId) {
+        return this.commentService.voteComment(commentId, upvote, userId);
+    }
+
+    @PutMapping("/editComment")
+    @ResponseBody
+    public Comment editComment(@RequestParam Long commentId, @RequestBody String newText, @RequestParam Long userId) {
+        return this.commentService.editComment(commentId, newText, userId);
+    }
+
+    @GetMapping("/getAllSorted")
+    @ResponseBody
+    public List<Comment> getAllCommentsSortedByScore() {
+        return this.commentService.getAllCommentsSortedByScore();
+    }
+
+    @GetMapping("/score")
+    @ResponseBody
+    public int getCommentScore(@RequestParam Long commentId) {
+        return this.commentService.getCommentScore(commentId);
     }
 }
