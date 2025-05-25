@@ -91,6 +91,7 @@
 				<artifactId>spring-boot-maven-plugin</artifactId>
 				<configuration>
 					<mainClass>proiect.proiectPs.ProiectPsApplication</mainClass>
+            		<jmxPort>9009</jmxPort>
 				</configuration>
 			</plugin>
 		</plugins>

@@ -8,7 +8,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
@@ -86,5 +85,11 @@ public class Post {
 
     public void setPost_date(Date post_date) {
         this.post_date = post_date;
+    }
+    public String getImage_link(){
+        return this.image_link;
+    }
+    public void setImage_link(String image_link){
+        this.image_link = image_link;
     }
 }

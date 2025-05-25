@@ -6,9 +6,20 @@ import java.util.List;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.web.multipart.MultipartFile;
 
 import proiect.proiectPs.entity.Post;
 import proiect.proiectPs.entity.PostHasTag;
@@ -39,6 +50,11 @@ public class PostService {
 
     @Autowired
     private PostHasTagRepository postHasTagRepository;
+
+    @Value("${filestorage.url:http://localhost:8081/files}")
+    private String fileStorageUrl;
+
+    private final RestTemplate restTemplate = new RestTemplate();
 
     public List<Post> retrievePosts() {
         return (List<Post>) this.postRepository.findAll();
@@ -165,5 +181,88 @@ public class PostService {
             score += vote.getVote();
         }
         return score;
+    }
+
+    // Uploads a file to the file storage microservice and returns the stored filename
+    public String uploadFileToStorage(MultipartFile file) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+
+        ByteArrayResource fileAsResource;
+        try {
+            fileAsResource = new ByteArrayResource(file.getBytes()) {
+                @Override
+                public String getFilename() {
+                    return file.getOriginalFilename();
+                }
+            };
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to read file for upload", e);
+        }
+
+        MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
+        body.add("file", fileAsResource);
+
+        HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
+
+        ResponseEntity<String> response = restTemplate.postForEntity(
+            fileStorageUrl + "/upload", requestEntity, String.class
+        );
+        // The microservice returns a message with the filename at the end
+        // e.g., "File uploaded successfully! Download URI: http://.../files/{filename}"
+        String responseBody = response.getBody();
+        if (responseBody != null && responseBody.contains("/files/")) {
+            return responseBody.substring(responseBody.lastIndexOf("/files/") + 7).trim();
+        }
+        throw new RuntimeException("File upload failed: " + responseBody);
+    }
+
+    // Downloads a file from the file storage microservice as a byte array
+    public byte[] downloadFileFromStorage(String filename) {
+        String url = fileStorageUrl + "/" + filename;
+        ResponseEntity<byte[]> response = restTemplate.getForEntity(url, byte[].class);
+        if (response.getStatusCode().is2xxSuccessful()) {
+            return response.getBody();
+        }
+        throw new RuntimeException("Failed to download file: " + filename);
+    }
+
+    // Example: update createPost to accept MultipartFile and upload image
+    public Post createPostWithImage(Post post, List<String> tags, MultipartFile imageFile) {
+        // Only authenticated users can create posts
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !auth.isAuthenticated() || auth.getPrincipal().equals("anonymousUser")) {
+            throw new RuntimeException("User must be logged in to create a post");
+        }
+        String currentEmail = auth.getName();
+        User user = userRepository.findByEmail(currentEmail);
+        if (user == null) {
+            throw new RuntimeException("Authenticated user not found");
+        }
+        post.setUser(user);
+
+        // Upload image to file storage microservice
+        if (imageFile != null && !imageFile.isEmpty()) {
+            String storedFilename = uploadFileToStorage(imageFile);
+            post.setImage_link(storedFilename); // Save only the filename
+        }
+
+        Post savedPost = this.postRepository.save(post);
+
+        // Attach tags to post
+        Set<String> uniqueTags = new HashSet<>(tags);
+        for (String tagText : uniqueTags) {
+            Tag tag = tagRepository.findByName(tagText);
+            if (tag == null) {
+                tag = new Tag();
+                tag.setTagText(tagText);
+                tag.setName(tagText);
+                tag = tagRepository.save(tag);
+            }
+            PostHasTagId phtId = new PostHasTagId(savedPost.getId(), tag.getTagText().hashCode() * 1L); // Use a unique id if needed
+            PostHasTag pht = new PostHasTag(phtId);
+            postHasTagRepository.save(pht);
+        }
+        return savedPost;
     }
 }
