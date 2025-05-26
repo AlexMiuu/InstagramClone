@@ -24,7 +24,7 @@
     <img [src]="post.imageUrl || '/placeholder.svg?height=600&width=600&query=Instagram post'" alt="Post image" class="post-image">
 
     <div class="post-content">
-      <div class.post-title>{{ post.title }}</div>
+      <div class="post-title">{{ post.title }}</div>
       <div class="post-text">{{ post.text }}</div>
       <div class="post-tags">
         <span *ngFor="let tag of post.tags" class="post-tag" (click)="filterByTag(tag)">
@@ -43,7 +43,7 @@
       </div>
 
       <div class="post-interaction">
-        <button pButton icon="pi pi-heart" [ngClass]="{'liked': post.likerIds?.includes(currentUserId)}"
+        <button pButton icon="pi pi-heart" [ngClass]="{'liked': post.likerIds.includes(currentUserId)}"
           class="p-button-text p-button-rounded" (click)="likePost(post)"></button>
         <button pButton icon="pi pi-comment" class="p-button-text p-button-rounded"
           (click)="toggleComments(post)"></button>

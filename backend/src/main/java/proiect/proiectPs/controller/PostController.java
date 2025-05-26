@@ -23,7 +23,11 @@ import org.springframework.web.multipart.MultipartFile;
 import proiect.proiectPs.entity.Post;
 import proiect.proiectPs.service.PostService;
 
-@CrossOrigin(origins = "http://localhost:4200")
+@CrossOrigin(
+    origins = "http://localhost:4200",
+    allowCredentials = "true",
+    allowedHeaders = "*"
+)
 @RestController
 @RequestMapping("/posts")
 public class PostController {

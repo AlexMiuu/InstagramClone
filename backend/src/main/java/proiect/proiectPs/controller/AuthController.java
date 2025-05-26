@@ -17,7 +17,11 @@ import proiect.proiectPs.entity.User;
 import proiect.proiectPs.security.JwtUtil;
 import proiect.proiectPs.service.UserService;
 
-@CrossOrigin(origins = "http://localhost:4200")
+@CrossOrigin(
+    origins = "http://localhost:4200",
+    allowCredentials = "true",
+    allowedHeaders = "*"
+)
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
