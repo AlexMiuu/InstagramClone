@@ -8,7 +8,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import org.springframework.web.bind.annotation.CrossOrigin;
 
 
 @Entity
@@ -35,6 +34,9 @@ public class User {
     @Column(name = "password")
     private String password;
 
+    @Column(name = "username")
+    private String username;
+
     public User(){}
 
     public User(Long id, String email, Date date_of_birth, boolean is_admin, boolean is_blocked) {
@@ -43,6 +45,15 @@ public class User {
         this.date_of_birth = date_of_birth;
         this.is_admin = is_admin;
         this.is_blocked = is_blocked;
+    }
+
+    public User(Long id, String email, String password, boolean is_admin, boolean is_blocked, String username) {
+        this.id = id;
+        this.email = email;
+        this.password = password;
+        this.is_admin = is_admin;
+        this.is_blocked = is_blocked;
+        this.username = username;
     }
 
     public Long getId() {
@@ -91,5 +102,26 @@ public class User {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    @Override
+    public String toString() {
+        return "User{" +
+                "id=" + id +
+                ", email='" + email + '\'' +
+                ", date_of_birth=" + date_of_birth +
+                ", is_admin=" + is_admin +
+                ", is_blocked=" + is_blocked +
+                ", password='" + password + '\'' +
+                ", username='" + username + '\'' +
+                '}';
     }
 }

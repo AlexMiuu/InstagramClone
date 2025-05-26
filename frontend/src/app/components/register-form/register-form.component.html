@@ -50,6 +50,16 @@
         </small>
         </p>
 
+        <p>
+             <p-floatlabel variant="on">
+                <input pInputText id="username" formControlName="username" autocomplete="off" />
+                <label for="username">Username</label>
+            </p-floatlabel>
+            <small *ngIf="registerForm.get('username')?.invalid && registerForm.get('username')?.touched" class="p-error">
+                Username is required
+            </small>
+        </p>
+
     <p class="terms-of-use">
         It is possible that people who use our service may have uploaded your contact information to Instagram.
     </p>

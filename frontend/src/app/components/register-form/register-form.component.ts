@@ -40,6 +40,7 @@ export class RegisterFormComponent {
     this.registerForm = this.fb.group(
       {
         email: ["", [Validators.required, Validators.email]],
+        username: ["", Validators.required],
         password: ["", [Validators.required, Validators.minLength(6)]],
         confirmPassword: ["", Validators.required],
         dateOfBirth: ["", Validators.required],
@@ -60,9 +61,10 @@ export class RegisterFormComponent {
 
   onRegister(): void {
     if (this.registerForm.valid) {
-      const { email, password, dateOfBirth } = this.registerForm.value
+      const { email, username, password, dateOfBirth } = this.registerForm.value
       const user = {
         email,
+        username,
         password,
         date_of_birth: new Date(dateOfBirth),
         is_admin: false,

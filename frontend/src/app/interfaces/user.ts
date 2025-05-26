@@ -1,6 +1,7 @@
 export interface User {
   id?: number
   email: string
+  username: string
   password?: string
   date_of_birth?: Date
   is_admin: boolean
