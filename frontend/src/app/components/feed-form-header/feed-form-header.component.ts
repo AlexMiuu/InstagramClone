@@ -1,173 +1,148 @@
-import { Component,  OnInit } from "@angular/core"
-import { MenubarModule } from "primeng/menubar"
-import  { MenuItem } from "primeng/api"
-import { ButtonModule } from "primeng/button"
-import { InputTextModule } from "primeng/inputtext"
-import { CommonModule } from "@angular/common"
-import { FormsModule } from "@angular/forms"
-import { IconFieldModule } from "primeng/iconfield"
-import { InputIconModule } from "primeng/inputicon"
-import { FloatLabelModule } from "primeng/floatlabel"
-import {  Router, RouterModule } from "@angular/router"
-import { DialogModule } from "primeng/dialog"
-import { ChipModule } from "primeng/chip"
-import { ToastModule } from "primeng/toast"
-import { MessageService } from "primeng/api"
-import  { PostService } from "../../services/post.service"
-import  { TagService } from "../../services/tag.service"
-import  { Tag } from "../../interfaces/post.interface"
+import { Component, OnInit, Output, EventEmitter } from "@angular/core";
+import { Router } from "@angular/router";
+import { MessageService } from "primeng/api";
+import { PostService } from "../../services/post.service";
+
+// Unused TagService import removed
+// import { TagService } from "../../services/tag.service";
+// import { Tag } from "../../interfaces/post.interface";
+
+import { CommonModule } from "@angular/common";
+import { FormsModule } from "@angular/forms";
+import { MenubarModule } from "primeng/menubar";
+import { ButtonModule } from "primeng/button";
+import { InputTextModule } from "primeng/inputtext";
+import { DialogModule } from "primeng/dialog";
+// Unused FileUploadModule import removed
+// import { FileUploadModule } from "primeng/fileupload";
+import { DropdownModule } from "primeng/dropdown";
+import { ToastModule } from "primeng/toast";
+// Unused environment and MultiSelectModule imports removed
+// import { environment } from "../../../environments/environment";
+// import { MultiSelectModule } from 'primeng/multiselect';
 
 @Component({
   selector: "app-feed-form-header",
+  templateUrl: "./feed-form-header.component.html",
+  styleUrls: ["./feed-form-header.component.css"],
+  standalone: true, // Added standalone flag for clarity
   imports: [
+    CommonModule,
+    FormsModule,
     MenubarModule,
     ButtonModule,
-    FloatLabelModule,
     InputTextModule,
-    CommonModule,
-    IconFieldModule,
-    InputIconModule,
-    FloatLabelModule,
-    FormsModule,
-    RouterModule,
     DialogModule,
-    ChipModule,
+    DropdownModule,
     ToastModule,
   ],
   providers: [MessageService],
-  templateUrl: "./feed-form-header.component.html",
-  styleUrl: "./feed-form-header.component.css",
-  standalone: true,
 })
 export class FeedFormHeaderComponent implements OnInit {
-  items: MenuItem[] = []
-  searchValue = ""
-  currentRoute = ""
+  // Use an Output to notify parent components when a post is created
+  @Output() postCreated = new EventEmitter<void>();
 
-  // Create post dialog
-  displayCreatePostDialog = false
+  displayCreatePostDialog = false;
+  currentRoute = "";
+
+  // Strongly type the form object for better code quality and safety
   postForm: {
-    title: string
-    text: string
-    imageUrl: string
-    tagInput: string[]
-    selectedTags: Tag[]
+    title: string;
+    text: string;
   } = {
     title: "",
     text: "",
-    imageUrl: "",
-    tagInput: [],
-    selectedTags: [],
-  }
+  };
 
-  // Image upload
-  selectedFile: File | null = null
-  selectedFileName = ""
-  imagePreviewUrl = ""
+  tagsText = "";
+  selectedFile: File | null = null;
+  imagePreviewUrl: string | ArrayBuffer | null = null; // Correct type for FileReader result
 
   constructor(
     private router: Router,
     private postService: PostService,
-    private tagService: TagService,
-    private messageService: MessageService,
+    private messageService: MessageService
   ) {}
 
   ngOnInit() {
-    this.currentRoute = this.router.url
+    this.currentRoute = this.router.url;
   }
 
   navigateTo(route: string) {
-    this.router.navigate([route])
-    this.currentRoute = route
+    this.router.navigate([route]);
+    this.currentRoute = route;
   }
 
   createNewPost() {
-    this.resetPostForm()
-    this.displayCreatePostDialog = true
+    this.resetPostForm();
+    this.displayCreatePostDialog = true;
   }
 
   resetPostForm() {
     this.postForm = {
       title: "",
       text: "",
-      imageUrl: "",
-      tagInput: [],
-      selectedTags: [],
-    }
-    this.selectedFile = null
-    this.selectedFileName = ""
-    this.imagePreviewUrl = ""
+    };
+    this.tagsText = "";
+    this.selectedFile = null;
+    this.imagePreviewUrl = null;
   }
 
-  // Image selection handler
-  onImageSelected(event: any): void {
-    const file = event.target.files[0]
-    if (file) {
-      this.selectedFile = file
-      this.selectedFileName = file.name
+  onImageSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files[0]) {
+      const file = input.files[0];
+      this.selectedFile = file;
 
-      // Create a preview URL
-      const reader = new FileReader()
-      reader.onload = (e: any) => {
-        this.imagePreviewUrl = e.target.result
-        this.postForm.imageUrl = e.target.result // Store base64 image data
-      }
-      reader.readAsDataURL(file)
+      const reader = new FileReader();
+      reader.onload = () => {
+        this.imagePreviewUrl = reader.result;
+      };
+      reader.readAsDataURL(file);
     }
   }
 
-  onAddTag(event: any): void {
-    const tagName = event.value.toLowerCase()
-    this.tagService.createTag(tagName).subscribe((tag) => {
-      if (!this.postForm.selectedTags.some((t) => t.id === tag.id)) {
-        this.postForm.selectedTags.push(tag)
-      }
-    })
+ savePostForm(): void {
+  if (!this.postForm.title || !this.postForm.text) {
+    this.messageService.add({
+      severity: "error",
+      summary: "Error",
+      detail: "Title and description are required",
+    });
+    return;
   }
 
-  savePostForm(): void {
-    if (!this.postForm.title || !this.postForm.text) {
-      this.messageService.add({
-        severity: "error",
-        summary: "Error",
-        detail: "Title and text are required",
-      })
-      return
-    }
+  // Separate the core post data from the tags, as required by the new service method
+  const postData = {
+    title: this.postForm.title,
+    text: this.postForm.text,
+  };
 
-    const postData = {
-      title: this.postForm.title,
-      text: this.postForm.text,
-      imageUrl: this.postForm.imageUrl,
-    }
+  const tags = this.tagsText
+    .split(",")
+    .map((tag) => tag.trim())
+    .filter((tag) => tag.length > 0);
 
-    this.postService.createPost(postData, this.postForm.selectedTags).subscribe((newPost) => {
-      this.messageService.add({
-        severity: "success",
-        summary: "Success",
-        detail: "Post created successfully",
-      })
-      this.displayCreatePostDialog = false
-
-      // Refresh the feed
-      this.router.navigateByUrl("/", { skipLocationChange: true }).then(() => {
-        this.router.navigate(["/feed"])
-      })
-    })
-  }
-
-  searchPosts() {
-    // Refresh the feed with search filter
-    if (this.searchValue.trim()) {
-      // Pass the search value to the feed component
-      this.postService.setSearchFilter(this.searchValue)
-    } else {
-      this.postService.clearSearchFilter()
-    }
-
-    // Refresh the feed
-    this.router.navigateByUrl("/", { skipLocationChange: true }).then(() => {
-      this.router.navigate(["/feed"])
-    })
-  }
+  // Call the updated service method with three distinct arguments
+  this.postService
+    .createPostWithImage(postData, tags, this.selectedFile)
+    .subscribe({
+      next: () => {
+        this.messageService.add({
+          severity: "success",
+          summary: "Success",
+          detail: "Post created successfully",
+        });
+        this.displayCreatePostDialog = false;
+        this.postCreated.emit();
+      },
+      error: (error) => {
+        this.messageService.add({
+          severity: "error",
+          summary: "Error",
+          detail: "Failed to create post: " + error.message,
+        });
+      },
+    });
+}
 }

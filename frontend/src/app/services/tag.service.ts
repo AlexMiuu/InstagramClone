@@ -1,51 +1,85 @@
 import { Injectable } from "@angular/core"
-import { BehaviorSubject,  Observable, of } from "rxjs"
+import {  HttpClient, HttpParams } from "@angular/common/http"
+import  { Observable } from "rxjs"
+import { map } from "rxjs/operators"
 import  { Tag } from "../interfaces/post.interface"
-import { v4 as uuidv4 } from "uuid"
+import { environment } from "../../environments/environment"
 
 @Injectable({
   providedIn: "root",
 })
 export class TagService {
-  private tags: Tag[] = [
-    { id: "1", name: "travel" },
-    { id: "2", name: "food" },
-    { id: "3", name: "fashion" },
-    { id: "4", name: "photography" },
-  ]
+  private apiUrl = `${environment.apiUrl}/tags`
 
-  private tagsSubject = new BehaviorSubject<Tag[]>(this.tags)
+  constructor(private http: HttpClient) {}
 
-  constructor() {}
-
+  /**
+   * Get all tags from the backend
+   */
   getTags(): Observable<Tag[]> {
-    return this.tagsSubject.asObservable()
+    return this.http.get<any[]>(`${this.apiUrl}/getAll`).pipe(map((tags) => this.mapTagsFromBackend(tags)))
   }
 
-  createTag(name: string): Observable<Tag> {
-    // Check if tag already exists
-    const existingTag = this.tags.find((t) => t.name.toLowerCase() === name.toLowerCase())
-    if (existingTag) {
-      return of(existingTag)
-    }
-
-    // Create new tag
-    const newTag: Tag = {
-      id: uuidv4(),
-      name: name.toLowerCase(),
-    }
-
-    this.tags.push(newTag)
-    this.tagsSubject.next(this.tags)
-    return of(newTag)
-  }
-
+  /**
+   * Search tags by substring
+   */
   searchTags(query: string): Observable<Tag[]> {
-    if (!query) {
-      return of(this.tags)
+    if (!query || query.trim() === "") {
+      return this.getTags()
     }
 
-    const filteredTags = this.tags.filter((tag) => tag.name.toLowerCase().includes(query.toLowerCase()))
-    return of(filteredTags)
+    const params = new HttpParams().set("substring", query)
+    return this.http.get<any[]>(`${this.apiUrl}/search`, { params }).pipe(map((tags) => this.mapTagsFromBackend(tags)))
+  }
+
+  /**
+   * Create a new tag
+   */
+  createTag(name: string): Observable<Tag> {
+    const tag = { name: name.toLowerCase() }
+    return this.http.post<any>(`${this.apiUrl}/create`, tag).pipe(map((tag) => this.mapTagFromBackend(tag)))
+  }
+
+  /**
+   * Update an existing tag
+   */
+  updateTag(tag: Tag): Observable<Tag> {
+    const backendTag = this.mapTagToBackend(tag)
+    return this.http.put<any>(`${this.apiUrl}/updateTag`, backendTag).pipe(map((tag) => this.mapTagFromBackend(tag)))
+  }
+
+  /**
+   * Delete a tag by ID
+   */
+  deleteTag(id: string): Observable<string> {
+    const params = new HttpParams().set("id", id)
+    return this.http.delete<string>(`${this.apiUrl}/delete`, { params })
+  }
+
+  /**
+   * Map a backend tag to the frontend Tag interface
+   */
+  private mapTagFromBackend(backendTag: any): Tag {
+    return {
+      id: backendTag.id.toString(),
+      name: backendTag.name,
+    }
+  }
+
+  /**
+   * Map multiple backend tags to frontend Tag interface
+   */
+  private mapTagsFromBackend(backendTags: any[]): Tag[] {
+    return backendTags.map((tag) => this.mapTagFromBackend(tag))
+  }
+
+  /**
+   * Map a frontend Tag to the backend format
+   */
+  private mapTagToBackend(tag: Tag): any {
+    return {
+      id: tag.id ? Number.parseInt(tag.id) : null,
+      name: tag.name,
+    }
   }
 }

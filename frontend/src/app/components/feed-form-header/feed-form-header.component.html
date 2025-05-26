@@ -1,66 +1,92 @@
 <div class="header-container">
-    <p-menubar [model]="items" styleClass="custom-menubar">
-        <ng-template pTemplate="start">
-            <div class="logo-container">
-                <span class="instagram-logo">Instagram</span>
-            </div>
+  <p-menubar styleClass="custom-menubar">
+    <ng-template pTemplate="start">
+      <div class="logo-container">
+        <span class="instagram-logo" (click)="navigateTo('/feed')" style="cursor: pointer;">Instagram</span>
+      </div>
 
-            <div class="search-container">
-                <div class="p-input-icon-left">
-                    <i class="pi pi-search"></i>
-                    <input type="text" pInputText [(ngModel)]="searchValue" placeholder="Search by title" class="search-input" (input)="searchPosts()" />
-                </div>
-            </div>
-        </ng-template>
-        
-        <ng-template pTemplate="end">
-            <div class="icons-container">
-                <button pButton [icon]="'pi pi-home'" class="p-button-rounded p-button-text large-icon" [ngClass]="{'active': currentRoute === '/feed'}" (click)="navigateTo('/feed')"></button>
-                <button pButton [icon]="'pi pi-plus'" class="p-button-rounded p-button-text large-icon" (click)="createNewPost()"></button>
-                <button pButton [icon]="'pi pi-user'" class="p-button-rounded p-button-text large-icon" [ngClass]="{'active': currentRoute === '/profile'}" (click)="navigateTo('/profile')"></button>
-            </div>
-        </ng-template>
-    </p-menubar>    
+      <div class="search-container">
+        <div class="p-input-icon-left">
+          <i class="pi pi-search"></i>
+          <input
+            type="text"
+            pInputText
+            placeholder="Search..."
+            class="search-input"
+          />
+        </div>
+      </div>
+    </ng-template>
+
+    <ng-template pTemplate="end">
+      <div class="icons-container">
+        <button
+          pButton
+          icon="pi pi-home"
+          class="p-button-rounded p-button-text large-icon"
+          [ngClass]="{'active': currentRoute === '/feed'}"
+          (click)="navigateTo('/feed')"
+        ></button>
+        <button
+          pButton
+          icon="pi pi-plus"
+          class="p-button-rounded p-button-text large-icon"
+          (click)="createNewPost()"
+        ></button>
+        <button
+          pButton
+          icon="pi pi-user"
+          class="p-button-rounded p-button-text large-icon"
+          [ngClass]="{'active': currentRoute === '/profile'}"
+          (click)="navigateTo('/profile')"
+        ></button>
+      </div>
+    </ng-template>
+  </p-menubar>
 </div>
 
-<!-- Create Post Dialog -->
-<p-dialog [(visible)]="displayCreatePostDialog" [header]="'Create New Post'" [modal]="true" 
-  [style]="{width: '50vw'}" [draggable]="false" [resizable]="false" styleClass="post-dialog">
+<p-dialog
+  [(visible)]="displayCreatePostDialog"
+  header="Create New Post"
+  [modal]="true"
+  [style]="{width: '50vw'}"
+  [draggable]="false"
+  [resizable]="false"
+  styleClass="post-dialog"
+  (onHide)="resetPostForm()"
+>
   <div class="p-fluid">
     <div class="field">
       <label for="title">Title</label>
-      <input id="title" type="text" pInputText [(ngModel)]="postForm.title" required>
+      <input id="title" type="text" pInputText [(ngModel)]="postForm.title" required />
     </div>
-    
+
     <div class="field">
-      <label for="text">Text</label>
+      <label for="text">Description</label>
       <textarea id="text" pInputTextarea [(ngModel)]="postForm.text" rows="5" required></textarea>
     </div>
-    
-    <!-- Image upload button -->
+
     <div class="field">
       <label>Image</label>
       <div class="file-upload-container">
-        <label for="imageUpload" class="custom-file-upload">
+        <label for="header-file-upload" class="custom-file-upload">
           <i class="pi pi-upload"></i> Upload Image
         </label>
-        <input id="imageUpload" type="file" accept="image/*" style="display:none" (change)="onImageSelected($event)">
-        <span class="file-name" *ngIf="selectedFileName">{{ selectedFileName }}</span>
+        <input id="header-file-upload" type="file" accept="image/*" style="display:none" (change)="onImageSelected($event)" />
       </div>
-      
-      <!-- Image preview -->
+
       <div class="image-preview-container" *ngIf="imagePreviewUrl">
-        <img [src]="imagePreviewUrl" class="image-preview" alt="Preview">
+        <img [src]="imagePreviewUrl" class="image-preview" alt="Preview" />
       </div>
     </div>
-    
+
     <div class="field">
       <label for="tags">Tags</label>
-      <p-chips [(ngModel)]="postForm.tagInput" separator="," placeholder="Enter tags and press enter" 
-        (onAdd)="onAddTag($event)"></p-chips>
+      <input id="tags" type="text" pInputText [(ngModel)]="tagsText" placeholder="e.g., travel, food, nature" />
+      <small class="helper-text">Separate tags with commas</small>
     </div>
   </div>
-  
+
   <ng-template pTemplate="footer">
     <button pButton pRipple label="Cancel" icon="pi pi-times" class="p-button-text" (click)="displayCreatePostDialog = false"></button>
     <button pButton pRipple label="Save" icon="pi pi-check" class="purple-button" (click)="savePostForm()"></button>

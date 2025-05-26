@@ -61,23 +61,7 @@ public class SecurityConfig {
     }
 
 
-    @Bean
-    CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration configuration = new CorsConfiguration();
-        // IMPORTANT: Specify the exact origin of your frontend application
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:4200"));
-        // Specify which HTTP methods are allowed
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        // Specify which headers are allowed
-        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type"));
-        // Allow credentials (e.g., cookies, authorization headers)
-        configuration.setAllowCredentials(true);
 
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        // Apply this configuration to all paths in your application
-        source.registerCorsConfiguration("/**", configuration);
-        return source;
-    }
 //*/
 /*
     @Bean

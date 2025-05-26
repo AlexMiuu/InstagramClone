@@ -1,31 +1,11 @@
-<div class="stories-section">
-  <p-carousel [value]="stories" [numVisible]="7" [numScroll]="7" [circular]="true"
-    [responsiveOptions]="responsiveOptions" styleClass="stories-carousel">
-    <ng-template let-story pTemplate="item">
-      <div class="story-item">
-        <div class="story-avatar-container" [ngClass]="{'unseen': story.hasUnseenStory}">
-          <p-avatar label="P" styleClass="mr-2" size="xlarge" shape="circle" />
-        </div>
-        <span class="story-username">{{story.username}}</span>
-      </div>
-    </ng-template>
-  </p-carousel>
-</div>
-
-<!-- Filter Section - Stylized -->
 <div class="post-section">
   <div class="filter-bar">
-    <p-button [label]="showMyPostsOnly ? ' Posts' : 'My Posts'"
-      icon="pi pi-user"
-      [ngClass]="{'active': showMyPostsOnly}"
+    <p-button label="Reload Posts"
+      icon="pi pi-refresh"
       styleClass="p-button-rounded p-button-outlined"
-      (onClick)="toggleMyPosts()"></p-button>
-
-    <p-dropdown [options]="tags" [(ngModel)]="selectedTag" optionLabel="name" placeholder="Filter by tag"
-      [showClear]="true" (onChange)="applyFilters()" styleClass="p-inputtext-sm"></p-dropdown>
+      (onClick)="loadPosts()"></p-button>
   </div>
 
-  <!-- Posts List -->
   <div *ngFor="let post of posts" class="post-card">
     <div class="post-header">
       <div class="post-user-info">
@@ -44,15 +24,13 @@
     <img [src]="post.imageUrl || '/placeholder.svg?height=600&width=600&query=Instagram post'" alt="Post image" class="post-image">
 
     <div class="post-content">
-      <div class="post-title">{{ post.title }}</div>
+      <div class.post-title>{{ post.title }}</div>
       <div class="post-text">{{ post.text }}</div>
-
       <div class="post-tags">
         <span *ngFor="let tag of post.tags" class="post-tag" (click)="filterByTag(tag)">
           #{{ tag.name }}
         </span>
       </div>
-
       <div class="post-status">Status: {{ post.status }}</div>
     </div>
 
@@ -65,73 +43,53 @@
       </div>
 
       <div class="post-interaction">
-        <button pButton icon="pi pi-heart" [ngClass]="{'liked': post.likes}"
+        <button pButton icon="pi pi-heart" [ngClass]="{'liked': post.likerIds?.includes(currentUserId)}"
           class="p-button-text p-button-rounded" (click)="likePost(post)"></button>
         <button pButton icon="pi pi-comment" class="p-button-text p-button-rounded"
           (click)="toggleComments(post)"></button>
+      </div>
+    </div>
 
+    <div class="post-comment-section" *ngIf="post.showComments">
+      <div *ngFor="let comment of post.comments" class="post-comment">
+        <p-inplace #inplace [style]="{'width': '100%'}">
+          <ng-template pTemplate="display">
+            <div class="comment-display-container">
+              <div>
+                <span class="post-comment-username">{{ comment.username }}</span>
+                <span class="post-comment-text">{{ comment.text }}</span>
+              </div>
+            </div>
+          </ng-template>
+          <ng-template pTemplate="content">
+            <div class="comment-edit-form-inplace">
+              <input #editedCommentInput type="text" class="post-comment-input" [value]="comment.text" (keyup.enter)="inplace.deactivate(); editComment(comment, editedCommentInput.value)">
+              <div class="comment-edit-actions">
+                <button pButton icon="pi pi-check" class="p-button-rounded p-button-sm"
+                  (click)="inplace.deactivate(); editComment(comment, editedCommentInput.value)"></button>
+                <button pButton icon="pi pi-times" class="p-button-rounded p-button-text p-button-sm"
+                  (click)="inplace.deactivate()"></button>
+              </div>
+            </div>
+          </ng-template>
+        </p-inplace>
+
+        <div class="comment-footer">
+          <div class="comment-votes">
+            <button pButton icon="pi pi-chevron-up" class="p-button-text p-button-rounded p-button-sm" (click)="upvoteComment(comment)"></button>
+            <span class="comment-score">{{ comment.score || 0 }}</span>
+            <button pButton icon="pi pi-chevron-down" class="p-button-text p-button-rounded p-button-sm" (click)="downvoteComment(comment)"></button>
+          </div>
+          <button *ngIf="comment.userId === currentUserId" pButton icon="pi pi-trash" class="p-button-text p-button-rounded p-button-danger p-button-sm" (click)="deleteComment(comment)"></button>
+        </div>
       </div>
 
-      <div class="post-comment-section" *ngIf="post.showComments">
-        <div *ngFor="let comment of post.comments" class="post-comment">
-          <span class="post-comment-username">{{ comment.username }}</span>
-          <span class="post-comment-text">{{ comment.text }}</span>
-        </div>
-
-        <div class="post-comment-form">
-          <input type="text" class="post-comment-input" [(ngModel)]="post.newComment"
-            placeholder="Add a comment..." (keyup.enter)="addComment(post)">
-          <button pButton icon="pi pi-send" class="p-button-rounded"
-            (click)="addComment(post)"></button>
-        </div>
+      <div class="post-comment-form">
+        <input type="text" class="post-comment-input" [(ngModel)]="post.newComment"
+          placeholder="Add a comment..." (keyup.enter)="addComment(post)">
+        <button pButton icon="pi pi-send" class="p-button-rounded"
+          (click)="addComment(post)"></button>
       </div>
     </div>
   </div>
 </div>
-
-<!-- Create/Edit Post Dialog - Stylized -->
-<p-dialog [(visible)]="displayPostDialog" [header]="editingPost ? 'Edit Post' : 'Create Post'" [modal]="true"
-  [style]="{width: '50vw'}" [draggable]="false" [resizable]="false" styleClass="post-dialog">
-  <div class="p-fluid">
-    <div class="field">
-      <label for="title">Title</label>
-      <input id="title" type="text" pInputText [(ngModel)]="postForm.title" required>
-    </div>
-
-    <div class="field">
-      <label for="text">Text</label>
-      <textarea id="text" pInputTextarea [(ngModel)]="postForm.text" rows="5" required></textarea>
-    </div>
-
-    <!-- Image upload button instead of URL -->
-    <div class="field">
-      <label>Image</label>
-      <div class="file-upload-container">
-        <label for="imageUpload" class="custom-file-upload">
-          <i class="pi pi-upload"></i> Upload Image
-        </label>
-        <input id="imageUpload" type="file" accept="image/*" style="display:none" (change)="onImageSelected($event)">
-        <span class="file-name" *ngIf="selectedFileName">{{ selectedFileName }}</span>
-      </div>
-
-      <!-- Image preview -->
-      <div class="image-preview-container" *ngIf="imagePreviewUrl">
-        <img [src]="imagePreviewUrl" class="image-preview" alt="Preview">
-      </div>
-    </div>
-
-    <div class="field">
-      <label for="tags">Tags</label>
-      <p-chips [(ngModel)]="postForm.tagInput" separator="," placeholder="Enter tags and press enter"
-        (onAdd)="onAddTag($event)"></p-chips>
-    </div>
-  </div>
-
-  <ng-template pTemplate="footer">
-    <button pButton pRipple label="Cancel" icon="pi pi-times" class="p-button-text" (click)="displayPostDialog = false"></button>
-    <button pButton pRipple label="Save" icon="pi pi-check" class="purple-button" (click)="savePostForm()"></button>
-  </ng-template>
-</p-dialog>
-
-<!-- Delete Confirmation Dialog -->
-<p-confirmDialog [style]="{width: '450px'}"></p-confirmDialog>
