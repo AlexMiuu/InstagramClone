@@ -118,4 +118,10 @@ public class PostController {
         }
         return this.postService.createPostWithImage(post, tags, imageFile);
     }
+
+    @GetMapping("/score")
+    @ResponseBody
+    public int getPostScore(@RequestParam Long postId) {
+        return this.postService.getPostScore(postId);
+    }
 }
