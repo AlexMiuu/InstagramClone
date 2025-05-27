@@ -25,8 +25,26 @@ class UserServiceTest {
     @Test
     void testRetrieveAllUsers() {
         // Arrange
-        User user1 = new User(1L, "user1@example.com", null, false, false, "user1");
-        User user2 = new User(2L, "user2@example.com", null, false, false, "user2");
+        User user1 = new User(
+            1L,
+            "user1@example.com",
+            null,
+            false,
+            false,
+            "pass1",
+            "user1",
+            "1234567890"
+        );
+        User user2 = new User(
+            2L,
+            "user2@example.com",
+            null,
+            false,
+            false,
+            "pass2",
+            "user2",
+            "0987654321"
+        );
         List<User> mockUsers = Arrays.asList(user1, user2);
 
         when(userRepository.findAll()).thenReturn(mockUsers);

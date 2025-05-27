@@ -36,36 +36,19 @@ public class User {
 
     @Column(name = "username")
     private String username;
+
     @Column(name = "phoneNumber")
     private String phoneNumber;
 
-    public User(){}
-
-    public User(Long id, String email, Date date_of_birth, boolean is_admin, boolean is_blocked, String phoneNumber) {
+    public User(Long id, String email, Date date_of_birth, boolean is_admin, boolean is_blocked, String password, String username, String phoneNumber) {
         this.id = id;
         this.email = email;
         this.date_of_birth = date_of_birth;
         this.is_admin = is_admin;
         this.is_blocked = is_blocked;
+        this.password = password;
+        this.username = username;
         this.phoneNumber = phoneNumber;
-    }
-
-    public User(Long id, String email, String password, boolean is_admin, boolean is_blocked, String username) {
-        this.id = id;
-        this.email = email;
-        this.password = password;
-        this.is_admin = is_admin;
-        this.is_blocked = is_blocked;
-        this.username = username;
-    }
-
-    public User(Long id, String email, String password, boolean is_admin, boolean is_blocked, String username) {
-        this.id = id;
-        this.email = email;
-        this.password = password;
-        this.is_admin = is_admin;
-        this.is_blocked = is_blocked;
-        this.username = username;
     }
 
     public Long getId() {
