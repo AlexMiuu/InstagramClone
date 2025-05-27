@@ -39,7 +39,7 @@ public class User {
 
     @Column(name = "phoneNumber")
     private String phoneNumber;
-
+    public User(){}
     public User(Long id, String email, Date date_of_birth, boolean is_admin, boolean is_blocked, String password, String username, String phoneNumber) {
         this.id = id;
         this.email = email;

@@ -43,6 +43,7 @@ public class SecurityConfig {
             .authorizeHttpRequests()
             .requestMatchers(new AntPathRequestMatcher("/h2-console/**")).permitAll()
             .requestMatchers(new AntPathRequestMatcher("/auth/**")).permitAll()
+            .requestMatchers(new AntPathRequestMatcher("/test-api")).permitAll()
             .requestMatchers(new AntPathRequestMatcher("/users/deleteUser")).hasRole("ADMIN")
             .requestMatchers(new AntPathRequestMatcher("/users/getAll")).hasRole("ADMIN")
             .requestMatchers(new AntPathRequestMatcher("/users/banUser")).hasAnyRole("USER", "ADMIN")

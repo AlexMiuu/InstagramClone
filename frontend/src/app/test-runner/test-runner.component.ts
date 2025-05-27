@@ -8,7 +8,7 @@ import { firstValueFrom } from "rxjs";
 
 @Component({
   selector: "app-test-runner",
-  template: "",
+  template: "<div>Test Runner Loaded</div>", // minimal template
 })
 export class TestRunnerComponent {
   constructor(

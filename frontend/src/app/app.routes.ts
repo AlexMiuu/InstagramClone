@@ -45,8 +45,8 @@ export const routes: Routes = [
         : [
             {
               path: "test-runner",
-              loadComponent: () =>
-                import("./test-runner/test-runner.component").then((m) => m.TestRunnerComponent),
+              loadChildren: () =>
+                import("./test-runner/test-runner.module").then((m) => m.TestRunnerModule),
             },
           ]),
 ];

@@ -33,11 +33,14 @@ public class UserService {
     }
 
     public User insertUser(User user) {
+        System.out.println("Registering user: " + user.getEmail());
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         // Prevent privilege escalation on registration
         user.setIs_admin(false);
         user.setIs_blocked(false);
-        return this.userRepository.save(user);
+        User saved = this.userRepository.save(user);
+        System.out.println("User registered with hashed password: " + saved.getPassword());
+        return saved;
     }
 
     public String deleteUserById(Long id) {

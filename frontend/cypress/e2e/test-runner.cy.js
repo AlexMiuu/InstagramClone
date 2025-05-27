@@ -1,3 +1,17 @@
+// Utility to wait for window.testRunner to be available
+function waitForTestRunner(win) {
+  return new Cypress.Promise((resolve) => {
+    const check = () => {
+      if (win.testRunner) {
+        resolve(win.testRunner);
+      } else {
+        setTimeout(check, 50);
+      }
+    };
+    check();
+  });
+}
+
 describe("Angular Service E2E via Test Runner", () => {
   beforeEach(() => {
     cy.visit("http://localhost:4200/test-runner");
@@ -6,7 +20,9 @@ describe("Angular Service E2E via Test Runner", () => {
   it("calls backend GET and POST endpoints", () => {
     cy.intercept("GET", "http://localhost:8080/test-api/hello").as("hello");
     cy.window().then((win) => {
-      return win.testRunner.callHello();
+      return waitForTestRunner(win);
+    }).then((testRunner) => {
+      return testRunner.callHello();
     }).then((resp) => {
       expect(resp).to.eq("Hello from backend!");
     });
@@ -14,7 +30,9 @@ describe("Angular Service E2E via Test Runner", () => {
 
     cy.intercept("POST", "http://localhost:8080/test-api/echo").as("echo");
     cy.window().then((win) => {
-      return win.testRunner.callEcho("Cypress!");
+      return waitForTestRunner(win);
+    }).then((testRunner) => {
+      return testRunner.callEcho("Cypress!");
     }).then((resp) => {
       expect(resp).to.eq("Echo: Cypress!");
     });
@@ -24,7 +42,9 @@ describe("Angular Service E2E via Test Runner", () => {
   it("calls Angular service methods and inspects HTTP requests", () => {
     cy.intercept("GET", "http://localhost:8080/posts/getAll").as("getPosts");
     cy.window().then((win) => {
-      return win.testRunner.getAllPosts();
+      return waitForTestRunner(win);
+    }).then((testRunner) => {
+      return testRunner.getAllPosts();
     }).then((posts) => {
       expect(posts).to.be.an("array");
     });
@@ -32,7 +52,9 @@ describe("Angular Service E2E via Test Runner", () => {
 
     cy.intercept("GET", "http://localhost:8080/tags/getAll").as("getTags");
     cy.window().then((win) => {
-      return win.testRunner.getAllTags();
+      return waitForTestRunner(win);
+    }).then((testRunner) => {
+      return testRunner.getAllTags();
     }).then((tags) => {
       expect(tags).to.be.an("array");
     });
