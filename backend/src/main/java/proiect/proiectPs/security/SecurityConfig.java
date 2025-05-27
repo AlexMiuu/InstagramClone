@@ -42,7 +42,7 @@ public class SecurityConfig {
             .requestMatchers(new AntPathRequestMatcher("/auth/**")).permitAll()
             .requestMatchers(new AntPathRequestMatcher("/users/deleteUser")).hasRole("ADMIN")
             .requestMatchers(new AntPathRequestMatcher("/users/getAll")).hasRole("ADMIN")
-            .requestMatchers(new AntPathRequestMatcher("/users/banUser")).hasRole("ADMIN")
+            .requestMatchers(new AntPathRequestMatcher("/users/banUser")).hasAnyRole("USER", "ADMIN")
             .requestMatchers(new AntPathRequestMatcher("/comments/vote")).hasAnyRole("USER", "ADMIN")
             .requestMatchers(new AntPathRequestMatcher("/comments/insertComment")).hasAnyRole("USER", "ADMIN")
             .requestMatchers(new AntPathRequestMatcher("/comments/editComment")).hasAnyRole("USER", "ADMIN")

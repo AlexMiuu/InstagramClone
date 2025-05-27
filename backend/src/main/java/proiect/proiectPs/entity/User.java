@@ -35,14 +35,18 @@ public class User {
     @Column(name = "password")
     private String password;
 
+    @Column(name = "phoneNumber")
+    private String phoneNumber;
+
     public User(){}
 
-    public User(Long id, String email, Date date_of_birth, boolean is_admin, boolean is_blocked) {
+    public User(Long id, String email, Date date_of_birth, boolean is_admin, boolean is_blocked, String phoneNumber) {
         this.id = id;
         this.email = email;
         this.date_of_birth = date_of_birth;
         this.is_admin = is_admin;
         this.is_blocked = is_blocked;
+        this.phoneNumber = phoneNumber;
     }
 
     public Long getId() {
@@ -91,5 +95,13 @@ public class User {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public String getPhoneNumber() {
+        return phoneNumber;
+    }
+
+    public void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
     }
 }
