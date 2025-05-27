@@ -25,6 +25,8 @@ public class UserService {
     private UserVotedPostRepository userVotedPostRepository;
     @Autowired
     private UserVotedCommentRepository userVotedCommentRepository;
+    @Autowired
+    private BanNotificationService banNotificationService;
 
     public List<User> retrieveAllUsers() {
         return (List<User>) this.userRepository.findAll();
@@ -89,6 +91,9 @@ public class UserService {
         if (user == null) return "User not found";
         user.setIs_blocked(true);
         userRepository.save(user);
+
+        banNotificationService.notifyBan(user.getEmail(), user.getPhoneNumber());
+
         return "User banned";
     }
 

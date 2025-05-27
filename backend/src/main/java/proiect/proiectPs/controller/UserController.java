@@ -30,6 +30,10 @@ public class UserController {
     @GetMapping("/getAll")
     @ResponseBody
     public List<User> retrieveAllUsers() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !auth.isAuthenticated() || auth.getPrincipal().equals("anonymousUser")) {
+            return null;
+        }
         return this.userService.retrieveAllUsers();
     }
 
