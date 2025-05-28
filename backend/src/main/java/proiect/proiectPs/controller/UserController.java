@@ -41,13 +41,17 @@ public class UserController {
     public ResponseEntity<User> getCurrentUser() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth == null || !auth.isAuthenticated() || auth.getPrincipal().equals("anonymousUser")) {
+            System.out.println("/users/me: Not authenticated");
             return ResponseEntity.status(401).build();
         }
         String email = auth.getName();
+        System.out.println("/users/me: auth.getName() = " + email);
         User user = userService.findByEmail(email);
         if (user == null) {
+            System.out.println("/users/me: No user found for email: " + email);
             return ResponseEntity.notFound().build();
         }
+        System.out.println("/users/me: Found user id=" + user.getId());
         return ResponseEntity.ok(user);
     }
 

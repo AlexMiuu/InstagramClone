@@ -57,6 +57,7 @@ public class SecurityConfig {
             .requestMatchers(new AntPathRequestMatcher("/tags/create")).hasRole("ADMIN")
             .requestMatchers(new AntPathRequestMatcher("/tags/updateTag")).hasRole("ADMIN")
             .requestMatchers(new AntPathRequestMatcher("/tags/delete")).hasRole("ADMIN")
+            .requestMatchers(new AntPathRequestMatcher("/users/me")).authenticated()
             .anyRequest().permitAll();
         http.headers().frameOptions().disable();
 

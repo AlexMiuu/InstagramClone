@@ -37,8 +37,13 @@ public class PostController {
 
     @PostMapping("/insertPost")
     @ResponseBody
-    public Post insertPost(@RequestBody Post post) {
-        return this.postService.insertPost(post);
+    public ResponseEntity<?> insertPost(@RequestBody Post post) {
+        try {
+            Post createdPost = this.postService.insertPost(post);
+            return ResponseEntity.ok(createdPost);
+        } catch (Exception e) {
+            return ResponseEntity.status(401).body("Unauthorized or invalid request: " + e.getMessage());
+        }
     }
 
     @PutMapping("/updatePost")

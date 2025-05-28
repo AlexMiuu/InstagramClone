@@ -33,8 +33,12 @@ export class AuthService {
   }
 
   logout(): void {
-    localStorage.removeItem(this.tokenKey)
-    this.currentUserSubject.next(null)
+    this.clearToken();
+    this.currentUserSubject.next(null);
+  }
+
+  clearToken(): void {
+    localStorage.removeItem(this.tokenKey);
   }
 
   getToken(): string | null {
