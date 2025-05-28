@@ -27,7 +27,35 @@ export class PostService {
 
   // Get all posts sorted by score
   getSortedPosts(): Observable<Post[]> {
-    return this.http.get<Post[]>(`${this.apiUrl}/getAllSorted`).pipe(map((posts) => this.mapPostsFromBackend(posts)))
+    return this.http.get<Post[]>(`${this.apiUrl}/getAllSorted`).pipe(
+      map((posts) => this.mapPostsFromBackend(posts)),
+      map((posts) =>
+        posts.sort((a, b) => {
+          // Sort by score descending, then by date descending
+          if (b.likes !== a.likes) {
+            return b.likes - a.likes;
+          }
+          return (b.createdAt?.getTime() || 0) - (a.createdAt?.getTime() || 0);
+        })
+      )
+    );
+  }
+
+  // Get all posts sorted by date
+  getPostsSortedByDate(): Observable<Post[]> {
+    return this.http.get<Post[]>(`${this.apiUrl}/sortedByDate`).pipe(
+      map((posts) => this.mapPostsFromBackend(posts)),
+      map((posts) =>
+        posts.sort((a, b) => (b.createdAt?.getTime() || 0) - (a.createdAt?.getTime() || 0))
+      )
+    );
+  }
+
+  // Get posts filtered by username (for "only mine" toggle)
+  getPostsFilteredByUsername(username: string): Observable<Post[]> {
+    return this.http.get<Post[]>(`${this.apiUrl}/filterByUsername`, {
+      params: { username }
+    }).pipe(map((posts) => this.mapPostsFromBackend(posts)))
   }
 
   // Get post by ID
@@ -220,31 +248,33 @@ private mapPostFromBackend(backendPost: any): Post {
   if (!backendPost) {
     return {} as Post; // Return an empty object to be filtered out later if needed
   }
-  
+
+  // Extract user info from nested user object if present
+  const user = backendPost.user || {};
+  const authorId = user.id?.toString() || backendPost.authorId || backendPost.user_id?.toString() || '';
+  const authorUsername = user.username || backendPost.authorUsername || backendPost.username || "Unknown User";
+
   return {
-    // FIX: Use optional chaining (?.) and provide a default value ('')
-    // This reads: "If backendPost.id exists, convert it to a string. Otherwise, use an empty string."
     id: backendPost.id?.toString() || '',
-    authorId: backendPost.user_id?.toString() || '',
-    authorUsername: backendPost.username || "Unknown User",
+    authorId: authorId,
+    authorUsername: authorUsername,
     title: backendPost.title || "",
-    text: backendPost.description || "",
-    createdAt: new Date(backendPost.created_at || new Date()),
+    text: backendPost.description || backendPost.text || "",
+    createdAt: new Date(backendPost.created_at || backendPost.post_date || new Date()),
     imageUrl: backendPost.image_link ? `${this.apiUrl}/image/${backendPost.id}` : "",
     status: this.determinePostStatus(backendPost),
     tags: (backendPost.tags || []).map((tag: any) => ({
-      id: tag.id?.toString() || '', // Also make tag mapping safer
+      id: tag.id?.toString() || '',
       name: tag.name,
     })),
     likes: backendPost.score || 0,
-    // Add the required likerIds property, assuming it might come from the backend
-    likerIds: backendPost.likerIds || [], 
+    likerIds: backendPost.likerIds || [],
     comments: (backendPost.comments || []).map((comment: any) => ({
-      id: comment.id?.toString() || '', // Also make comment mapping safer
+      id: comment.id?.toString() || '',
       userId: comment.user_id?.toString() || '',
       username: comment.username || "Unknown User",
       text: comment.text || "",
-      timestamp: new Date(comment.created_at || new Date()),
+      timestamp: new Date(comment.created_at || comment.timestamp || new Date()),
       score: comment.score || 0,
     })),
   };

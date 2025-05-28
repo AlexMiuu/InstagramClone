@@ -128,4 +128,22 @@ public class PostController {
     public int getPostScore(@RequestParam Long postId) {
         return this.postService.getPostScore(postId);
     }
+
+    @GetMapping("/sortedByDate")
+    @ResponseBody
+    public List<Post> getPostsSortedByDate() {
+        return this.postService.getPostsSortedByDate();
+    }
+
+    @GetMapping("/filterByTitle")
+    @ResponseBody
+    public List<Post> getPostsFilteredByTitle(@RequestParam String search) {
+        return this.postService.getPostsFilteredByTitle(search);
+    }
+
+    @GetMapping("/filterByUsername")
+    @ResponseBody
+    public List<Post> getPostsFilteredByUsername(@RequestParam String username) {
+        return this.postService.getPostsFilteredByUsername(username);
+    }
 }

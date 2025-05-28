@@ -1,9 +1,11 @@
 package proiect.proiectPs.service;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -72,6 +74,7 @@ public class PostService {
             throw new RuntimeException("Authenticated user not found");
         }
         post.setUser(user);
+        post.setPost_date(new Date()); // Set current date
         return this.postRepository.save(post);
     }
 
@@ -96,6 +99,7 @@ public class PostService {
             throw new RuntimeException("Authenticated user not found");
         }
         post.setUser(user);
+        post.setPost_date(new Date()); // Set current date
         Post savedPost = this.postRepository.save(post);
 
         // Attach tags to post
@@ -155,7 +159,16 @@ public class PostService {
 
     public List<Post> getAllPostsSortedByScore() {
         List<Post> posts = (List<Post>) postRepository.findAll();
-        posts.sort((a, b) -> Integer.compare(getPostScore(b.getId()), getPostScore(a.getId())));
+        posts.sort((a, b) -> {
+            int scoreDiff = Integer.compare(getPostScore(b.getId()), getPostScore(a.getId()));
+            if (scoreDiff != 0) return scoreDiff;
+            Date d1 = a.getPost_date();
+            Date d2 = b.getPost_date();
+            if (d1 == null && d2 == null) return 0;
+            if (d1 == null) return 1;
+            if (d2 == null) return -1;
+            return d2.compareTo(d1); // Descending (newest first)
+        });
         return posts;
     }
 
@@ -240,6 +253,7 @@ public class PostService {
             throw new RuntimeException("Authenticated user not found");
         }
         post.setUser(user);
+        post.setPost_date(new Date()); // Set current date
 
         // Upload image to file storage microservice
         if (imageFile != null && !imageFile.isEmpty()) {
@@ -264,5 +278,37 @@ public class PostService {
             postHasTagRepository.save(pht);
         }
         return savedPost;
+    }
+
+    // --- New functionalities ---
+
+    public List<Post> getPostsSortedByDate() {
+        List<Post> posts = (List<Post>) postRepository.findAll();
+        posts.sort((a, b) -> {
+            Date d1 = a.getPost_date();
+            Date d2 = b.getPost_date();
+            if (d1 == null && d2 == null) return 0;
+            if (d1 == null) return 1;
+            if (d2 == null) return -1;
+            return d2.compareTo(d1); // Descending (newest first)
+        });
+        return posts;
+    }
+
+    public List<Post> getPostsFilteredByTitle(String search) {
+        List<Post> posts = (List<Post>) postRepository.findAll();
+        String searchLower = search == null ? "" : search.toLowerCase();
+        return posts.stream()
+            .filter(p -> p.getTitle() != null && p.getTitle().toLowerCase().contains(searchLower))
+            .collect(Collectors.toList());
+    }
+
+    public List<Post> getPostsFilteredByUsername(String username) {
+        List<Post> posts = (List<Post>) postRepository.findAll();
+        String usernameLower = username == null ? "" : username.toLowerCase();
+        return posts.stream()
+            .filter(p -> p.getUser() != null && p.getUser().getUsername() != null &&
+                         p.getUser().getUsername().toLowerCase().equals(usernameLower))
+            .collect(Collectors.toList());
     }
 }

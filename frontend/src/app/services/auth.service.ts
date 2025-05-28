@@ -20,6 +20,7 @@ export class AuthService {
   }
 
   login(email: string, password: string): Observable<string> {
+    this.clearToken();
     return this.http.post<string>(`${this.apiUrl}/login`, { email, password }, { responseType: "text" as "json" }).pipe(
       tap((token) => {
         this.setToken(token)
@@ -29,6 +30,7 @@ export class AuthService {
   }
 
   register(user: User): Observable<string> {
+    this.clearToken();
     return this.http.post<string>(`${this.apiUrl}/register`, user, { responseType: "text" as "json" })
   }
 

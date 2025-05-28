@@ -4,6 +4,29 @@
       icon="pi pi-refresh"
       styleClass="p-button-rounded p-button-outlined"
       (onClick)="loadPosts()"></p-button>
+
+    <!-- Sort Dropdown -->
+    <p-dropdown 
+      [options]="sortOptions" 
+      [(ngModel)]="selectedSort"
+      (onChange)="onSortChange($event)"
+      styleClass="p-button-rounded p-button-outlined"
+      [showClear]="false"
+      [autoDisplayFirst]="true"
+      [style]="{'margin-left':'10px', 'width':'180px'}"
+      placeholder="Sort by"
+    ></p-dropdown>
+
+    <!-- Only My Posts Toggle -->
+    <button 
+      pButton 
+      [label]="onlyMine ? 'Show All Posts' : 'Show Only My Posts'"
+      [icon]="onlyMine ? 'pi pi-user' : 'pi pi-users'"
+      styleClass="p-button-rounded p-button-outlined"
+      [class.p-button-info]="onlyMine"
+      (click)="onToggleOnlyMine()"
+      [style]="{'margin-left':'10px'}"
+    ></button>
   </div>
 
   <div *ngFor="let post of posts" class="post-card">

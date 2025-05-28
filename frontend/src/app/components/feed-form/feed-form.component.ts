@@ -3,6 +3,7 @@ import { ConfirmationService, MessageService } from "primeng/api";
 import { PostService } from "../../services/post.service";
 import { TagService } from "../../services/tag.service";
 import { CommentService } from "../../services/comment.service";
+import { Observable } from "rxjs";
 // Import the interfaces from your file
 import { Post, Tag, Comment } from "../../interfaces/post.interface";
 
@@ -90,6 +91,13 @@ export class FeedFormComponent implements OnInit {
   selectedFileName = "";
   imagePreviewUrl: string | ArrayBuffer | null = null;
 
+  sortOptions = [
+    { label: "Sort by Score", value: "score" },
+    { label: "Sort by Date", value: "date" }
+  ];
+  selectedSort = "score";
+  onlyMine = false;
+
   constructor(
     private postService: PostService,
     private tagService: TagService,
@@ -104,36 +112,49 @@ export class FeedFormComponent implements OnInit {
     this.loadTags();
   }
 
-loadPosts(): void {
-  console.log("1. Starting loadPosts()..."); // Log that the function started
-  
-  this.postService.getPosts().subscribe({
-    next: (postsFromBackend) => {
-      // Log exactly what the service returned, before mapping
-      console.log("2. Received from service:", postsFromBackend); 
+  loadPosts(): void {
+    // Sorting and filtering logic
+    let postsObservable: Observable<Post[]>;
 
-      this.posts = postsFromBackend.map(post => ({
-        ...post,
-        likerIds: (post as any).likerIds || [],
-        showComments: false,
-        newComment: "",
-      }));
-      
-      // Log the final state of the 'posts' array
-      console.log("3. Final component 'posts' array:", this.posts);
-    },
-    error: (error) => {
-      // If an error occurs anywhere in the process, it will be logged here
-      console.error("ERROR in loadPosts():", error); 
-      
-      this.messageService.add({
-        severity: "error",
-        summary: "Error",
-        detail: "Failed to load posts: " + error.message,
-      });
-    },
-  });
-}
+    if (this.onlyMine && this.currentUserId) {
+      // Filter by username (authorUsername)
+      postsObservable = this.postService.getPostsFilteredByUsername(this.currentUserId);
+    } else if (this.selectedSort === "score") {
+      postsObservable = this.postService.getSortedPosts();
+    } else if (this.selectedSort === "date") {
+      postsObservable = this.postService.getPostsSortedByDate();
+    } else {
+      postsObservable = this.postService.getPosts();
+    }
+
+    postsObservable.subscribe({
+      next: (postsFromBackend: Post[]) => {
+        this.posts = postsFromBackend.map((post: Post) => ({
+          ...post,
+          likerIds: (post as any).likerIds || [],
+          showComments: false,
+          newComment: "",
+        }));
+      },
+      error: (error: any) => {
+        this.messageService.add({
+          severity: "error",
+          summary: "Error",
+          detail: "Failed to load posts: " + error.message,
+        });
+      },
+    });
+  }
+
+  onSortChange(event: any): void {
+    this.selectedSort = event.value;
+    this.loadPosts();
+  }
+
+  onToggleOnlyMine(): void {
+    this.onlyMine = !this.onlyMine;
+    this.loadPosts();
+  }
 
   loadTags(): void {
     this.tagService.getTags().subscribe({
