@@ -65,6 +65,7 @@ export class FeedFormComponent implements OnInit {
   // Use the PostViewModel for our component's state
   posts: PostViewModel[] = [];
   currentUserId = "";
+  currentUsername = ""; // <-- add this line
   tags: Tag[] = [];
   selectedTag: Tag | null = null;
 
@@ -119,18 +120,23 @@ export class FeedFormComponent implements OnInit {
 
   ngOnInit(): void {
     this.currentUserId = this.postService.getCurrentUserId();
+    // Add this line to get the current user's username
+    this.currentUsername = this.postService.authService.getCurrentUser()?.username || "";
     this.loadPosts();
     this.loadTags();
   }
 
   loadPosts(): void {
-    // Sorting and filtering logic
-    let postsObservable: Observable<Post[]>;
+    if (this.onlyMine) {
+      this.postService.getPostsFilteredByUsername(this.currentUsername).subscribe({
+        next: (posts: Post[]) => this.setPosts(posts),
+        error: (error: any) => this.showError("Failed to load posts: " + error.message),
+      });
+      return;
+    }
 
-    if (this.onlyMine && this.currentUserId) {
-      // Filter by username (authorUsername)
-      postsObservable = this.postService.getPostsFilteredByUsername(this.currentUserId);
-    } else if (this.selectedSort === "score") {
+    let postsObservable: Observable<Post[]>;
+    if (this.selectedSort === "score") {
       postsObservable = this.postService.getSortedPosts();
     } else if (this.selectedSort === "date") {
       postsObservable = this.postService.getPostsSortedByDate();
@@ -139,28 +145,26 @@ export class FeedFormComponent implements OnInit {
     }
 
     postsObservable.subscribe({
-      next: (postsFromBackend: Post[]) => {
-        this.posts = postsFromBackend.map((post: Post) => ({
-          ...post,
-          likerIds: (post as any).likerIds || [],
-          showComments: false,
-          newComment: "",
-        }));
-      },
-      error: (error: any) => {
-        this.messageService.add({
-          severity: "error",
-          summary: "Error",
-          detail: "Failed to load posts: " + error.message,
-        });
-      },
+      next: (posts: Post[]) => this.setPosts(posts),
+      error: (error: any) => this.showError("Failed to load posts: " + error.message),
     });
 
-    // If a search is active, use search logic instead of default loading
     if (this.searchText.trim() !== "") {
       this.searchPosts();
-      return;
     }
+  }
+
+  private setPosts(posts: Post[]): void {
+    this.posts = posts.map(post => ({
+      ...post,
+      likerIds: (post as any).likerIds || [],
+      showComments: false,
+      newComment: "",
+    }));
+  }
+
+  private showError(detail: string): void {
+    this.messageService.add({ severity: "error", summary: "Error", detail });
   }
 
   searchPosts(): void {
@@ -178,7 +182,7 @@ export class FeedFormComponent implements OnInit {
       obs = this.postService.getPostsFilteredByTitle(query);
     }
     obs.subscribe({
-      next: (posts) => {
+      next: (posts: Post[]) => {
         this.posts = posts.map(post => ({
           ...post,
           likerIds: (post as any).likerIds || [],
@@ -186,7 +190,7 @@ export class FeedFormComponent implements OnInit {
           newComment: "",
         }));
       },
-      error: (error) => {
+      error: (error: any) => {
         this.messageService.add({
           severity: "error",
           summary: "Error",
@@ -203,7 +207,20 @@ export class FeedFormComponent implements OnInit {
 
   onToggleOnlyMine(): void {
     this.onlyMine = !this.onlyMine;
-    this.loadPosts();
+
+    // Always get the current username from /users/me
+    this.postService.authService
+      .getCurrentUserFromApi()
+      .subscribe({
+        next: (user: any) => { // <-- add type annotation here
+          this.currentUsername = user?.username || "";
+          this.loadPosts();
+        },
+        error: () => {
+          this.currentUsername = "";
+          this.loadPosts();
+        }
+      });
   }
 
   loadTags(): void {

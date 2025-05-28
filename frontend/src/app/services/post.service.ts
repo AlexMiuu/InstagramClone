@@ -16,7 +16,7 @@ export class PostService {
 
   constructor(
     private http: HttpClient,
-    private authService: AuthService,
+    public authService: AuthService, // <-- change from private to public
     private commentService: CommentService,
   ) {}
 

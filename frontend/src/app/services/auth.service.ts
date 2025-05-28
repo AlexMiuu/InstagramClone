@@ -65,4 +65,14 @@ export class AuthService {
   getCurrentUser(): User | null {
     return this.currentUserSubject.value
   }
+
+  // Add this method to fetch the current user from the API and return as Observable
+  getCurrentUserFromApi(): Observable<User | null> {
+    return this.http.get<User>("http://localhost:8080/users/me").pipe(
+      tap({
+        next: (user) => this.currentUserSubject.next(user),
+        error: () => this.currentUserSubject.next(null),
+      })
+    );
+  }
 }
