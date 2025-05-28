@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnInit, Output } from "@angular/core";
+import { Component, EventEmitter, Input, OnInit, Output, ViewChild, ElementRef } from "@angular/core";
 import { ConfirmationService, MessageService } from "primeng/api";
 import { PostService } from "../../services/post.service";
 import { TagService } from "../../services/tag.service";
@@ -98,6 +98,17 @@ export class FeedFormComponent implements OnInit {
   selectedSort = "score";
   onlyMine = false;
 
+  // Search functionality
+  searchText: string = "";
+  searchType: "tag" | "username" | "title" = "tag";
+  searchOptions = [
+    { label: "Tag", value: "tag" },
+    { label: "Username", value: "username" },
+    { label: "Title", value: "title" }
+  ];
+
+  @ViewChild('searchInput') searchInputRef!: ElementRef<HTMLInputElement>;
+
   constructor(
     private postService: PostService,
     private tagService: TagService,
@@ -143,6 +154,45 @@ export class FeedFormComponent implements OnInit {
           detail: "Failed to load posts: " + error.message,
         });
       },
+    });
+
+    // If a search is active, use search logic instead of default loading
+    if (this.searchText.trim() !== "") {
+      this.searchPosts();
+      return;
+    }
+  }
+
+  searchPosts(): void {
+    const query = this.searchText.trim();
+    if (!query) {
+      this.loadPosts();
+      return;
+    }
+    let obs: Observable<Post[]>;
+    if (this.searchType === "tag") {
+      obs = this.postService.getPostsByTag(query);
+    } else if (this.searchType === "username") {
+      obs = this.postService.getPostsFilteredByUsername(query);
+    } else {
+      obs = this.postService.getPostsFilteredByTitle(query);
+    }
+    obs.subscribe({
+      next: (posts) => {
+        this.posts = posts.map(post => ({
+          ...post,
+          likerIds: (post as any).likerIds || [],
+          showComments: false,
+          newComment: "",
+        }));
+      },
+      error: (error) => {
+        this.messageService.add({
+          severity: "error",
+          summary: "Error",
+          detail: "Failed to search posts: " + error.message,
+        });
+      }
     });
   }
 
@@ -472,5 +522,28 @@ export class FeedFormComponent implements OnInit {
         });
       },
     });
+  }
+
+  onSearchButton(): void {
+    this.searchPosts();
+  }
+
+  onSearchInputKeydown(event: KeyboardEvent): void {
+    if (event.key === "Enter") {
+      this.searchPosts();
+    }
+  }
+
+  onSearchTypeChange(event: any): void {
+    this.searchType = event.value;
+    // Optionally clear search text or trigger search
+  }
+
+  clearSearch(): void {
+    this.searchText = "";
+    this.loadPosts();
+    if (this.searchInputRef) {
+      this.searchInputRef.nativeElement.value = "";
+    }
   }
 }

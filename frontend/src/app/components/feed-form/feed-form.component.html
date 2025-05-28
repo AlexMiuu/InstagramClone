@@ -5,6 +5,34 @@
       styleClass="p-button-rounded p-button-outlined"
       (onClick)="loadPosts()"></p-button>
 
+    <!-- Search Bar, Dropdown, and Button -->
+    <input #searchInput
+      type="text"
+      class="filter-input"
+      placeholder="Search..."
+      [(ngModel)]="searchText"
+      (keydown)="onSearchInputKeydown($event)"
+      style="margin-left:10px; width:200px;" />
+
+    <p-dropdown
+      [options]="searchOptions"
+      [(ngModel)]="searchType"
+      (onChange)="onSearchTypeChange($event)"
+      styleClass="p-button-rounded p-button-outlined"
+      [showClear]="false"
+      [autoDisplayFirst]="true"
+      [style]="{'margin-left':'10px', 'width':'120px'}"
+      placeholder="Search by"
+    ></p-dropdown>
+
+    <p-button
+      label="Search"
+      icon="pi pi-search"
+      styleClass="p-button-rounded p-button-outlined"
+      (onClick)="onSearchButton()"
+      [style]="{'margin-left':'10px'}"
+    ></p-button>
+
     <!-- Sort Dropdown -->
     <p-dropdown 
       [options]="sortOptions" 

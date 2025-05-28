@@ -58,6 +58,13 @@ export class PostService {
     }).pipe(map((posts) => this.mapPostsFromBackend(posts)))
   }
 
+  // Get posts filtered by title (for search)
+  getPostsFilteredByTitle(title: string): Observable<Post[]> {
+    return this.http.get<Post[]>(`${this.apiUrl}/filterByTitle`, {
+      params: { search: title }
+    }).pipe(map((posts) => this.mapPostsFromBackend(posts)))
+  }
+
   // Get post by ID
   getPostById(id: string): Observable<Post | undefined> {
     // Since the backend doesn't have a direct endpoint for this,
