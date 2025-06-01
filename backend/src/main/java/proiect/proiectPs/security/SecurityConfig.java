@@ -33,27 +33,43 @@ public class SecurityConfig {
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
         return config.getAuthenticationManager();
     }
+
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOriginPatterns(Arrays.asList("*")); // In production, specify exact origins
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedHeaders(Arrays.asList("*"));
+        configuration.setAllowCredentials(true);
+        configuration.setExposedHeaders(Arrays.asList("Authorization"));
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
+    }
     //*
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http, HandlerMappingIntrospector introspector) throws Exception {
         http.csrf().disable()
-            .authorizeHttpRequests()
-            .requestMatchers(new AntPathRequestMatcher("/h2-console/**")).permitAll()
-            .requestMatchers(new AntPathRequestMatcher("/auth/**")).permitAll()
-            .requestMatchers(new AntPathRequestMatcher("/users/deleteUser")).hasRole("ADMIN")
-            .requestMatchers(new AntPathRequestMatcher("/users/getAll")).hasRole("ADMIN")
-            .requestMatchers(new AntPathRequestMatcher("/users/banUser")).hasRole("ADMIN")
-            .requestMatchers(new AntPathRequestMatcher("/comments/vote")).hasAnyRole("USER", "ADMIN")
-            .requestMatchers(new AntPathRequestMatcher("/comments/insertComment")).hasAnyRole("USER", "ADMIN")
-            .requestMatchers(new AntPathRequestMatcher("/comments/editComment")).hasAnyRole("USER", "ADMIN")
-            .requestMatchers(new AntPathRequestMatcher("/posts/create")).hasAnyRole("USER", "ADMIN")
-            .requestMatchers(new AntPathRequestMatcher("/posts/upvote")).hasAnyRole("USER", "ADMIN")
-            .requestMatchers(new AntPathRequestMatcher("/posts/edit")).hasAnyRole("USER", "ADMIN")
-            .requestMatchers(new AntPathRequestMatcher("/posts/delete")).hasAnyRole("USER", "ADMIN")
-            .requestMatchers(new AntPathRequestMatcher("/tags/create")).hasRole("ADMIN")
-            .requestMatchers(new AntPathRequestMatcher("/tags/updateTag")).hasRole("ADMIN")
-            .requestMatchers(new AntPathRequestMatcher("/tags/delete")).hasRole("ADMIN")
-            .anyRequest().permitAll();
+                .cors().configurationSource(corsConfigurationSource()) // Add CORS configuration
+                .and()
+                .authorizeHttpRequests()
+                .requestMatchers(new AntPathRequestMatcher("/h2-console/**")).permitAll()
+                .requestMatchers(new AntPathRequestMatcher("/auth/**")).permitAll()
+                .requestMatchers(new AntPathRequestMatcher("/users/deleteUser")).hasRole("ADMIN")
+                .requestMatchers(new AntPathRequestMatcher("/users/getAll")).hasRole("ADMIN")
+                .requestMatchers(new AntPathRequestMatcher("/users/banUser")).hasRole("ADMIN")
+                .requestMatchers(new AntPathRequestMatcher("/comments/vote")).hasAnyRole("USER", "ADMIN")
+                .requestMatchers(new AntPathRequestMatcher("/comments/insertComment")).hasAnyRole("USER", "ADMIN")
+                .requestMatchers(new AntPathRequestMatcher("/comments/editComment")).hasAnyRole("USER", "ADMIN")
+                .requestMatchers(new AntPathRequestMatcher("/posts/create")).hasAnyRole("USER", "ADMIN")
+                .requestMatchers(new AntPathRequestMatcher("/posts/upvote")).hasAnyRole("USER", "ADMIN")
+                .requestMatchers(new AntPathRequestMatcher("/posts/edit")).hasAnyRole("USER", "ADMIN")
+                .requestMatchers(new AntPathRequestMatcher("/posts/delete")).hasAnyRole("USER", "ADMIN")
+                .requestMatchers(new AntPathRequestMatcher("/tags/create")).hasRole("ADMIN")
+                .requestMatchers(new AntPathRequestMatcher("/tags/updateTag")).hasRole("ADMIN")
+                .requestMatchers(new AntPathRequestMatcher("/tags/delete")).hasRole("ADMIN")
+                .anyRequest().permitAll();
         http.headers().frameOptions().disable();
 
         http.addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);

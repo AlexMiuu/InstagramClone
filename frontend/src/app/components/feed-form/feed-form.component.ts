@@ -7,7 +7,7 @@ import { CommentService } from "../../services/comment.service";
 import { Post, Tag, Comment } from "../../interfaces/post.interface";
 
 // PrimeNG Modules
-import { CommonModule } from '@angular/common';
+import { CommonModule, DatePipe } from '@angular/common'; // Added DatePipe
 import { FormsModule } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
 import { AvatarModule } from 'primeng/avatar';
@@ -54,7 +54,7 @@ type PostViewModel = Post & {
   selector: "app-feed-form",
   templateUrl: "./feed-form.component.html",
   styleUrls: ["./feed-form.component.css"],
-  providers: [ConfirmationService, MessageService],
+  providers: [ConfirmationService, MessageService, DatePipe], // Added DatePipe
 })
 export class FeedFormComponent implements OnInit {
   @Input() displayPostDialog = false;
@@ -105,25 +105,39 @@ export class FeedFormComponent implements OnInit {
   }
 
 loadPosts(): void {
-  console.log("1. Starting loadPosts()..."); // Log that the function started
+  console.log("1. Starting loadPosts()..."); 
   
   this.postService.getPosts().subscribe({
     next: (postsFromBackend) => {
-      // Log exactly what the service returned, before mapping
-      console.log("2. Received from service:", postsFromBackend); 
+      console.log("2. Raw data from backend:", postsFromBackend); 
 
-      this.posts = postsFromBackend.map(post => ({
-        ...post,
-        likerIds: (post as any).likerIds || [],
-        showComments: false,
-        newComment: "",
-      }));
+      this.posts = postsFromBackend.map(post => {
+        // More detailed logging for each post
+        console.log(`Post ID ${post.id}:`, {
+          likes: post.likes,
+          likerIds: (post as any).likerIds,
+          comments: post.comments,
+          commentsCount: post.comments?.length || 0
+        });
+
+        return {
+          ...post,
+          // Ensure likerIds is always an array
+          likerIds: Array.isArray((post as any).likerIds) ? (post as any).likerIds : [],
+          showComments: false,
+          newComment: "",
+          // Ensure comments is always an array and properly typed
+          comments: Array.isArray(post.comments) ? post.comments.map(comment => ({
+            ...comment,
+            editing: false,
+            editText: ""
+          })) : []
+        };
+      });
       
-      // Log the final state of the 'posts' array
-      console.log("3. Final component 'posts' array:", this.posts);
+      console.log("3. Final mapped posts:", this.posts);
     },
     error: (error) => {
-      // If an error occurs anywhere in the process, it will be logged here
       console.error("ERROR in loadPosts():", error); 
       
       this.messageService.add({
@@ -165,9 +179,14 @@ loadPosts(): void {
       next: (posts) => {
         this.posts = posts.map(post => ({
           ...post,
-          likerIds: (post as any).likerIds || [],
+          likerIds: Array.isArray((post as any).likerIds) ? (post as any).likerIds : [],
           showComments: false,
           newComment: "",
+          comments: Array.isArray(post.comments) ? post.comments.map(comment => ({
+            ...comment,
+            editing: false,
+            editText: ""
+          })) : []
         }));
       },
       error: (error) => {
@@ -179,8 +198,12 @@ loadPosts(): void {
   }
 
   likePost(post: PostViewModel): void {
+    console.log("Liking post:", post.id, "Current likes:", post.likes);
+    
     this.postService.likePost(post.id).subscribe({
       next: (updatedPost) => {
+        console.log("Like response:", updatedPost);
+        
         if (updatedPost) {
           const index = this.posts.findIndex((p) => p.id === post.id);
           if (index !== -1) {
@@ -188,14 +211,22 @@ loadPosts(): void {
             const originalState = this.posts[index];
             this.posts[index] = {
               ...updatedPost,
-              likerIds: (updatedPost as any).likerIds || [],
+              likerIds: Array.isArray((updatedPost as any).likerIds) ? (updatedPost as any).likerIds : [],
               showComments: originalState.showComments,
               newComment: originalState.newComment,
+              comments: Array.isArray(updatedPost.comments) ? updatedPost.comments.map(comment => ({
+                ...comment,
+                editing: false,
+                editText: ""
+              })) : originalState.comments
             };
+            
+            console.log("Updated post in array:", this.posts[index]);
           }
         }
       },
       error: (error) => {
+        console.error("Like error:", error);
         this.messageService.add({
           severity: "error", summary: "Error", detail: "Failed to like post: " + error.message,
         });
@@ -205,32 +236,42 @@ loadPosts(): void {
 
   toggleComments(post: PostViewModel): void {
     post.showComments = !post.showComments;
+    console.log("Toggled comments for post:", post.id, "Show:", post.showComments, "Comments count:", post.comments.length);
   }
 
-  addComment(post: PostViewModel): void {
-    if (post.newComment && post.newComment.trim()) {
-      this.postService.addComment(post.id, post.newComment).subscribe({
-        next: (updatedPost) => {
-          if (updatedPost) {
-            const index = this.posts.findIndex((p) => p.id === post.id);
-            if (index !== -1) {
-              this.posts[index] = {
-                ...updatedPost,
-                likerIds: (updatedPost as any).likerIds || [],
-                showComments: true,
-                newComment: "",
-              };
-            }
-          }
-        },
-        error: (error) => {
-          this.messageService.add({
-            severity: "error", summary: "Error", detail: "Failed to add comment: " + error.message,
-          });
-        },
-      });
-    }
+addComment(post: PostViewModel): void {
+  const commentText = post.newComment?.trim();
+  console.log("Adding comment:", commentText, "to post:", post.id);
+  
+  if (commentText) {
+    this.postService.addComment(post.id, commentText).subscribe({
+      next: (response) => {
+        console.log("Add comment response:", response);
+        
+        // Reset the input field immediately
+        post.newComment = "";
+        
+        // Reload posts to get the updated data
+        this.loadPosts();
+        
+        this.messageService.add({
+          severity: "success",
+          summary: "Success", 
+          detail: "Comment added successfully"
+        });
+      },
+      error: (error) => {
+        console.error("Add comment error:", error);
+        
+        this.messageService.add({
+          severity: "error",
+          summary: "Error",
+          detail: "Failed to add comment: " + error.message,
+        });
+      },
+    });
   }
+}
 
   onImageSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
@@ -389,13 +430,18 @@ loadPosts(): void {
     this.commentService.voteComment(comment.id, true, this.currentUserId).subscribe({
       next: () => {
         this.commentService.getCommentScore(comment.id).subscribe({
-          next: (score) => { comment.score = score; },
+          next: (score) => { 
+            comment.score = score;
+            console.log("Updated comment score:", comment.id, score);
+          },
           error: (error) => {
+            console.error("Failed to get comment score:", error);
             this.messageService.add({ severity: "error", summary: "Error", detail: "Failed to get comment score: " + error.message });
           }
         });
       },
       error: (error) => {
+        console.error("Failed to upvote comment:", error);
         this.messageService.add({ severity: "error", summary: "Error", detail: "Failed to upvote comment: " + error.message });
       },
     });
@@ -405,13 +451,18 @@ loadPosts(): void {
     this.commentService.voteComment(comment.id, false, this.currentUserId).subscribe({
       next: () => {
         this.commentService.getCommentScore(comment.id).subscribe({
-          next: (score) => { comment.score = score; },
+          next: (score) => { 
+            comment.score = score;
+            console.log("Updated comment score:", comment.id, score);
+          },
           error: (error) => {
+            console.error("Failed to get comment score:", error);
             this.messageService.add({ severity: "error", summary: "Error", detail: "Failed to get comment score: " + error.message });
           }
         });
       },
       error: (error) => {
+        console.error("Failed to downvote comment:", error);
         this.messageService.add({ severity: "error", summary: "Error", detail: "Failed to downvote comment: " + error.message });
       },
     });
@@ -452,4 +503,8 @@ loadPosts(): void {
       },
     });
   }
+
+  trackByCommentId(index: number, comment: Comment): string {
+  return comment.id;
+}
 }

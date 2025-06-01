@@ -24,7 +24,7 @@
     <img [src]="post.imageUrl || '/placeholder.svg?height=600&width=600&query=Instagram post'" alt="Post image" class="post-image">
 
     <div class="post-content">
-      <div class.post-title>{{ post.title }}</div>
+      <div class="post-title">{{ post.title }}</div> <!-- Fixed CSS class syntax -->
       <div class="post-text">{{ post.text }}</div>
       <div class="post-tags">
         <span *ngFor="let tag of post.tags" class="post-tag" (click)="filterByTag(tag)">
@@ -32,26 +32,41 @@
         </span>
       </div>
       <div class="post-status">Status: {{ post.status }}</div>
+      
+      <!-- Debug information - remove this in production -->
+      <div class="debug-info" style="background: #f0f0f0; padding: 5px; margin: 5px 0; font-size: 12px;">
+        <strong>Debug:</strong> Likes: {{ post.likes }}, LikerIds: {{ post.likerIds | json }}, Comments: {{ post.comments?.length || 0 }}
+      </div>
     </div>
 
     <div class="post-footer">
       <div class="post-stats">
-        <div class="post-likes">{{ post.likes }} likes</div>
+        <div class="post-likes">{{ post.likes || 0 }} likes</div>
         <div class="post-comments-count" (click)="toggleComments(post)">
-          {{ post.comments.length }} comments
+          {{ post.comments?.length || 0 }} comments
         </div>
       </div>
 
       <div class="post-interaction">
-        <button pButton icon="pi pi-heart" [ngClass]="{'liked': post.likerIds?.includes(currentUserId)}"
-          class="p-button-text p-button-rounded" (click)="likePost(post)"></button>
-        <button pButton icon="pi pi-comment" class="p-button-text p-button-rounded"
+        <button pButton icon="pi pi-heart" 
+          [ngClass]="{'liked': post.likerIds?.includes(currentUserId)}"
+          class="p-button-text p-button-rounded" 
+          (click)="likePost(post)"></button>
+        <button pButton icon="pi pi-comment" 
+          class="p-button-text p-button-rounded"
           (click)="toggleComments(post)"></button>
       </div>
     </div>
 
     <div class="post-comment-section" *ngIf="post.showComments">
-      <div *ngFor="let comment of post.comments" class="post-comment">
+      <!-- Debug: Show if comments array exists -->
+      <div style="background: #e8f4f8; padding: 5px; margin: 5px 0; font-size: 12px;">
+        <strong>Comments Debug:</strong> Array length: {{ post.comments?.length || 0 }}, 
+        Show comments: {{ post.showComments }}, 
+        Comments exist: {{ !!post.comments }}
+      </div>
+      
+      <div *ngFor="let comment of post.comments; trackBy: trackByCommentId" class="post-comment">
         <p-inplace #inplace [style]="{'width': '100%'}">
           <ng-template pTemplate="display">
             <div class="comment-display-container">
