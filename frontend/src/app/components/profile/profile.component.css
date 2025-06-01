@@ -5,6 +5,17 @@
   color: #fff;
 }
 
+.profile-container.simplified {
+  max-width: 600px; /* Adjusted for a more focused view */
+  margin: 30px auto; /* Centered with some top margin */
+  padding: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: calc(100vh - 200px); /* Adjust based on header/footer height */
+  color: #fff; /* Default text color */
+}
+
 .profile-content {
   display: flex;
   background-color: #121212;
@@ -12,6 +23,36 @@
   border-radius: 4px;
   /* Add purple tint */
   box-shadow: 0 0 15px rgba(138, 43, 226, 0.2);
+}
+
+.loading-spinner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  gap: 1rem;
+}
+
+.profile-card-container {
+  width: 100%;
+}
+
+:host ::ng-deep .profile-card {
+  background-color: #121212; /* Dark background for the card */
+  color: #fff; /* White text */
+  border: 1px solid #262626; /* Subtle border */
+  border-radius: 8px; /* Rounded corners */
+  box-shadow: 0 4px 15px rgba(138, 43, 226, 0.2); /* Purple tint shadow */
+  overflow: hidden; /* Ensures header image fits well if used */
+}
+
+:host ::ng-deep .profile-card .p-card-content {
+  padding: 0; /* Remove default padding if header template is used for avatar */
+}
+
+:host ::ng-deep .profile-card .p-card-body {
+  padding: 0; /* Remove default padding if header template is used for avatar */
 }
 
 /* Sidebar Styles */
@@ -57,65 +98,127 @@
   margin-bottom: 32px;
 }
 
+@media (max-width: 768px) {
+  .profile-header {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .profile-avatar-container {
+    margin-right: 0;
+    margin-bottom: 16px;
+  }
+}
+
+@media (max-width: 735px) {
+  .profile-header {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .profile-avatar {
+    margin-right: 0;
+    margin-bottom: 20px;
+  }
+
+  .profile-username-section {
+    flex-direction: column;
+  }
+
+  .profile-stats {
+    justify-content: center;
+  }
+
+  .profile-bio {
+    text-align: center;
+    margin: 0 auto;
+  }
+
+  .posts-grid {
+    gap: 3px;
+  }
+}
+
+@media (max-width: 500px) {
+  .posts-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.profile-avatar-wrapper {
+  display: flex;
+  justify-content: center;
+  padding: 24px 0;
+  background-color: rgba(138, 43, 226, 0.1); /* Light purple tint for avatar background */
+}
+
+:host ::ng-deep .profile-avatar-large .p-avatar {
+  width: 128px !important;
+  height: 128px !important;
+  font-size: 4rem !important; /* Larger initial for avatar */
+  border: 3px solid #8a2be2; /* Purple border for avatar */
+}
+
+:host ::ng-deep .profile-avatar-large .p-avatar img {
+  border-radius: 50%; /* Ensure image inside avatar is also round */
+}
+
 .profile-avatar-container {
   margin-right: 32px;
 }
 
-.profile-name-container {
-  display: flex;
-  flex-direction: column;
-}
-
-.username {
-  margin: 0 0 8px 0;
-  font-size: 20px;
-  font-weight: 400;
-}
-
-.change-photo-btn {
-  padding: 0;
-  color: #8a2be2; /* Purple color */
-  font-weight: 600;
-}
-
-/* Profile Avatar */
-.profile-avatar {
-  margin-right: 30px;
-  flex-shrink: 0;
-}
-
 .profile-info {
   flex: 1;
+  padding: 24px;
+  text-align: left; /* Align text to the left */
 }
 
-.profile-username-section {
-  display: flex;
+.info-item {
+  margin-bottom: 16px; /* Space between items */
+  display: flex; /* Use flex for better alignment */
   align-items: center;
-  margin-bottom: 20px;
+  font-size: 1.1rem; /* Slightly larger font */
 }
 
-.profile-username {
-  font-size: 28px;
-  font-weight: 300;
-  margin: 0;
-  margin-right: 8px;
+@media (max-width: 768px) {
+  .info-item {
+    font-size: 1rem;
+    flex-direction: column; /* Stack label and value on small screens */
+    align-items: flex-start; /* Align items to the start when stacked */
+  }
+
+  .info-label {
+    min-width: auto; /* Remove min-width for stacked layout */
+    margin-bottom: 4px; /* Add some space below label when stacked */
+  }
+
+  .info-value.username {
+    font-size: 1.2rem; /* Adjust username size for smaller screens */
+  }
 }
 
-.verified-badge {
-  color: #8a2be2; /* Purple color */
-  font-size: 18px;
-  margin-right: 20px;
+.info-label {
+  font-weight: 600; /* Bold labels */
+  color: #a8a8a8; /* Lighter color for labels */
+  margin-right: 8px; /* Space between label and value */
+  min-width: 100px; /* Ensure labels align nicely */
 }
 
-.edit-profile-btn {
-  margin-right: 10px;
-  background-color: transparent;
-  border-color: #8a2be2; /* Purple color */
-  color: #fff;
+.info-value {
+  color: #ffffff; /* Bright white for values */
+  word-break: break-all; /* Prevent long emails/usernames from breaking layout */
 }
 
-.settings-btn {
-  color: #fff;
+.info-value.username {
+  font-size: 1.4rem; /* Larger username */
+  font-weight: bold;
+  color: #8a2be2; /* Purple color for username */
+}
+
+.info-value.score {
+  font-weight: bold;
+  color: #9d4eed; /* Lighter purple for score */
 }
 
 /* Profile Stats */
@@ -441,14 +544,15 @@
     border-bottom: 2px solid #8a2be2; /* Purple color */
   }
 
-  .profile-header {
-    flex-direction: column;
-    text-align: center;
+  .profile-container.simplified {
+    padding: 15px;
+    margin-top: 20px;
   }
 
-  .profile-avatar-container {
-    margin-right: 0;
-    margin-bottom: 16px;
+  :host ::ng-deep .profile-avatar-large .p-avatar {
+    width: 96px !important;
+    height: 96px !important;
+    font-size: 3rem !important;
   }
 }
 

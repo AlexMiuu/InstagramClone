@@ -61,8 +61,8 @@ export class TagService {
    */
   private mapTagFromBackend(backendTag: any): Tag {
     return {
-      id: backendTag.id.toString(),
-      name: backendTag.name,
+      id: backendTag && backendTag.id ? backendTag.id.toString() : "", // Handle missing ID
+      name: backendTag && backendTag.name ? backendTag.name : "Unnamed Tag", // Handle missing name
     }
   }
 

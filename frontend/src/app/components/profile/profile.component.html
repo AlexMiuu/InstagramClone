@@ -1,165 +1,56 @@
 <app-feed-form-header></app-feed-form-header>
 
 <div class="profile-container">
-  <div class="profile-content">
-    <!-- Sidebar Navigation -->
-    <div class="profile-sidebar">
-      <ul class="sidebar-menu">
-        <li [class.active]="activeSection === 'edit_profile'" (click)="setActiveSection('edit_profile')">
-          Edit Profile
-        </li>
-        <li [class.active]="activeSection === 'change_password'" (click)="setActiveSection('change_password')">
-          Change Password
-        </li>
-        <li [class.active]="activeSection === 'privacy'" (click)="setActiveSection('privacy')">
-          Privacy and Security
-        </li>
-      </ul>
+
+
+
+  <div class="profile-container simplified">
+    <!-- Loading State -->
+    <div *ngIf="loading" class="loading-spinner">
+      <p-progressSpinner styleClass="w-8rem h-8rem" strokeWidth="4"></p-progressSpinner>
+      <p>Loading profile...</p>
     </div>
 
-    <!-- Main Content Area -->
-    <div class="profile-main">
-      <!-- Edit Profile Section -->
-      <div *ngIf="activeSection === 'edit_profile'" class="edit-profile-section">
-        <div class="profile-header">
-          <div class="profile-avatar-container">
-            <p-avatar [image]="user.profileImage" size="xlarge" shape="circle"></p-avatar>
+    <!-- Loaded State - User Data Available -->
+    <div *ngIf="!loading && user" class="profile-card-container">
+      <p-card styleClass="profile-card">
+        <ng-template pTemplate="header">
+          <div class="profile-avatar-wrapper">
+            <p-avatar
+              [image]="user.profileImage"
+              size="xlarge"
+              shape="circle"
+              [label]="!user.profileImage && user.username ? user.username.charAt(0).toUpperCase() : undefined"
+              styleClass="profile-avatar-large"
+            ></p-avatar>
           </div>
-          <div class="profile-name-container">
-            <h2 class="username">{{ user.username }}</h2>
-            <button pButton class="p-button-text change-photo-btn" label="Change Profile Photo"></button>
+        </ng-template>
+
+        <div class="profile-info">
+          <div class="info-item">
+            <span class="info-label">Username:</span>
+            <span class="info-value username">{{ user.username }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Email:</span>
+            <span class="info-value email">{{ user.email }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Score:</span>
+            <span class="info-value score">{{ user.score }}</span>
           </div>
         </div>
+      </p-card>
+    </div>
 
-        <div class="profile-form">
-          <div class="form-group">
-            <label for="name">Name</label>
-            <input id="name" type="text" pInputText [(ngModel)]="user.fullName" class="form-control">
-            <small class="form-help">Help people discover your account by using the name you're known by: either your full name, nickname, or business name.</small>
+    <!-- Loaded State - User Data Not Available / Error -->
+    <div *ngIf="!loading && !user" class="profile-card-container">
+       <p-card styleClass="profile-card">
+          <div class="profile-info">
+              <p>Could not load user profile.</p>
           </div>
-
-          <div class="form-group">
-            <label for="username">Username</label>
-            <input id="username" type="text" pInputText [(ngModel)]="user.username" class="form-control">
-          </div>
-
-          <div class="form-group">
-            <label for="website">Website</label>
-            <input id="website" type="text" pInputText [(ngModel)]="user.website" class="form-control">
-          </div>
-
-          <div class="form-group">
-            <label for="bio">Bio</label>
-            <textarea id="bio" pInputTextarea [(ngModel)]="user.bio" rows="3" class="form-control"></textarea>
-          </div>
-
-          <p-divider></p-divider>
-
-          <div class="form-group">
-            <label for="email">Email</label>
-            <input id="email" type="email" pInputText [(ngModel)]="user.email" class="form-control">
-          </div>
-
-          <div class="form-group">
-            <label for="phone">Phone Number</label>
-            <input id="phone" type="tel" pInputText [(ngModel)]="user.phoneNumber" class="form-control">
-          </div>
-
-          <div class="form-group">
-            <label for="gender">Gender</label>
-            <input id="gender" type="text" pInputText [(ngModel)]="user.gender" class="form-control">
-          </div>
-
-          <div class="form-actions">
-            <button pButton label="Submit" class="p-button-primary submit-btn" (click)="saveProfile()"></button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Change Password Section -->
-      <div *ngIf="activeSection === 'change_password'" class="change-password-section">
-        <div class="profile-header">
-          <div class="profile-avatar-container">
-            <p-avatar [image]="user.profileImage" size="xlarge" shape="circle"></p-avatar>
-          </div>
-          <div class="profile-name-container">
-            <h2 class="username">{{ user.username }}</h2>
-          </div>
-        </div>
-
-        <div class="profile-form">
-          <div class="form-group">
-            <label for="old-password">Old Password</label>
-            <input id="old-password" type="password" pInputText class="form-control">
-          </div>
-
-          <div class="form-group">
-            <label for="new-password">New Password</label>
-            <input id="new-password" type="password" pInputText class="form-control">
-          </div>
-
-          <div class="form-group">
-            <label for="confirm-password">Confirm New Password</label>
-            <input id="confirm-password" type="password" pInputText class="form-control">
-          </div>
-
-          <div class="form-actions">
-            <button pButton label="Change Password" class="p-button-primary submit-btn"></button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Privacy and Security Section -->
-      <div *ngIf="activeSection === 'privacy'" class="privacy-section">
-        <h2>Privacy and Security</h2>
-        
-        <p-card styleClass="privacy-card">
-          <ng-template pTemplate="header">
-            <h3>Account Privacy</h3>
-          </ng-template>
-          <div class="privacy-option">
-            <div class="option-label">
-              <h4>Private Account</h4>
-              <p>When your account is private, only people you approve can see your photos and videos.</p>
-            </div>
-            <div class="option-toggle">
-              <button pButton icon="pi pi-check" class="p-button-rounded p-button-outlined"></button>
-            </div>
-          </div>
-        </p-card>
-
-        <p-card styleClass="privacy-card">
-          <ng-template pTemplate="header">
-            <h3>Activity Status</h3>
-          </ng-template>
-          <div class="privacy-option">
-            <div class="option-label">
-              <h4>Show Activity Status</h4>
-              <p>Allow accounts you follow and anyone you message to see when you were last active or are currently active.</p>
-            </div>
-            <div class="option-toggle">
-              <button pButton icon="pi pi-check" class="p-button-rounded p-button-outlined"></button>
-            </div>
-          </div>
-        </p-card>
-
-        <p-card styleClass="privacy-card">
-          <ng-template pTemplate="header">
-            <h3>Two-Factor Authentication</h3>
-          </ng-template>
-          <div class="privacy-option">
-            <div class="option-label">
-              <h4>Enable Two-Factor Authentication</h4>
-              <p>Protect your account with an extra layer of security.</p>
-            </div>
-            <div class="option-toggle">
-              <button pButton label="Set Up" class="p-button-outlined"></button>
-            </div>
-          </div>
-        </p-card>
-      </div>
+       </p-card>
     </div>
   </div>
-</div>
 
-<p-toast></p-toast>
+

@@ -1,90 +1,69 @@
 import { Component, type OnInit } from "@angular/core"
-import { CommonModule } from "@angular/common"
-import { AvatarModule } from "primeng/avatar"
-import { ButtonModule } from "primeng/button"
-import { DividerModule } from "primeng/divider"
-import { DialogModule } from "primeng/dialog"
-import { InputTextModule } from "primeng/inputtext"
-import { FormsModule } from "@angular/forms"
-import { ToastModule } from "primeng/toast"
-import { MessageService } from "primeng/api"
+import { CommonModule } from "@angular/common" // For *ngIf
+import { AvatarModule } from "primeng/avatar" // For p-avatar
+import { CardModule } from "primeng/card" // For p-card
+import { ProgressSpinnerModule } from "primeng/progressspinner" // For loading spinner
 import { FeedFormHeaderComponent } from "../feed-form-header/feed-form-header.component"
-import { CardModule } from "primeng/card"
-import { RouterModule } from "@angular/router"
+import  { AuthService } from "../../services/auth.service"
+import  { User as AuthUser } from "../../interfaces/user"
 
+// Simplified interface for the profile page
 interface ProfileUser {
   id: string
   username: string
-  fullName: string
-  bio: string
-  profileImage: string
-  isVerified: boolean
   email: string
-  phoneNumber?: string
-  gender?: string
-  website?: string
+  profileImage: string
+  score: number
 }
 
 @Component({
   selector: "app-profile",
   standalone: true,
-  imports: [
-    CommonModule,
-    AvatarModule,
-    ButtonModule,
-    DividerModule,
-    DialogModule,
-    InputTextModule,
-    FormsModule,
-    ToastModule,
-    FeedFormHeaderComponent,
-    CardModule,
-    RouterModule,
-  ],
-  providers: [MessageService],
+  imports: [CommonModule, AvatarModule, FeedFormHeaderComponent, CardModule, ProgressSpinnerModule],
+  providers: [], // MessageService and others removed
   templateUrl: "./profile.component.html",
   styleUrl: "./profile.component.css",
 })
 export class ProfileComponent implements OnInit {
-  user: ProfileUser = {
-    id: "user123",
-    username: "instagram_user",
-    fullName: "Instagram User",
-    bio: "Digital creator | Photography enthusiast 📸\nExploring the world one photo at a time ✈️",
-    profileImage: "/public\favicon.ico",
-    isVerified: true,
-    email: "user@example.com",
-    phoneNumber: "+1 (555) 123-4567",
-    gender: "Prefer not to say",
-    website: "www.instagram.com",
-  }
+  user: ProfileUser | null = null
+  loading = true
 
-  showEditProfileDialog = false
-  editedUser = { ...this.user }
-  activeSection = "edit_profile" // Can be 'edit_profile', 'change_password', 'privacy'
-
-  constructor(private messageService: MessageService) {}
+  constructor(private authService: AuthService) {}
 
   ngOnInit(): void {
-    // Initialize component
-  }
-
-  openEditProfileDialog(): void {
-    this.editedUser = { ...this.user }
-    this.showEditProfileDialog = true
-  }
-
-  saveProfile(): void {
-    this.user = { ...this.editedUser }
-    this.showEditProfileDialog = false
-    this.messageService.add({
-      severity: "success",
-      summary: "Success",
-      detail: "Profile updated successfully",
+    this.authService.getCurrentUserFromApi().subscribe({
+      next: (authUser: AuthUser | null) => {
+        if (authUser) {
+          this.user = {
+            id: authUser.id?.toString() || "N/A",
+            username: authUser.username || "Username not set",
+            email: authUser.email || "Email not set",
+            profileImage: `/placeholder.svg?height=128&width=128&query=user+avatar+${encodeURIComponent(authUser.username || "default")}`,
+            score: Math.floor(Math.random() * 5000) + 100, // Placeholder score, replace with actual data
+          }
+        } else {
+          // Fallback for non-authenticated or error state
+          this.user = {
+            id: "anonymous",
+            username: "Guest",
+            email: "N/A",
+            profileImage: "/placeholder.svg?height=128&width=128",
+            score: 0,
+          }
+        }
+        this.loading = false
+      },
+      error: (err) => {
+        console.error("Failed to load user data for profile:", err)
+        this.user = {
+          id: "error",
+          username: "Error Loading Profile",
+          email: "N/A",
+          profileImage: "/placeholder.svg?height=128&width=128",
+          score: 0,
+        }
+        this.loading = false
+      },
     })
-  }
-
-  setActiveSection(section: string): void {
-    this.activeSection = section
   }
 }

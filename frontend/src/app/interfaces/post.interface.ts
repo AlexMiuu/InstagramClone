@@ -11,7 +11,7 @@ export interface Post {
   status: string
   tags: Tag[]
   likes: number
-  likerIds?: number
+  likerIds: string[]
   comments: Comment[]
   
 }
@@ -37,6 +37,17 @@ export interface Comment {
   timestamp: Date
   score?: number
   postId?: string
+  // Add these fields to better match backend
+  post_date?: Date
+  user?: {
+    id: number
+    username: string
+    email: string
+  }
+  post?: {
+    id: number
+    title: string
+  }
 }
 
 export interface PostFilter {

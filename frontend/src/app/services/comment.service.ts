@@ -21,6 +21,16 @@ export class CommentService {
   }
 
   /**
+   * Get comments for a specific post
+   */
+  getCommentsByPostId(postId: string): Observable<Comment[]> {
+    const params = new HttpParams().set("postId", postId)
+    return this.http
+      .get<any[]>(`${this.apiUrl}/byPost`, { params })
+      .pipe(map((comments) => this.mapCommentsFromBackend(comments)))
+  }
+
+  /**
    * Get all comments sorted by score
    */
   getAllCommentsSorted(): Observable<Comment[]> {
@@ -34,15 +44,21 @@ export class CommentService {
    */
   createComment(postId: string, userId: string, text: string): Observable<Comment> {
     const comment = {
-      post_id: Number(postId),
-      user_id: Number(userId),
       text: text,
-      created_at: new Date(),
+      post_date: new Date(),
+      user: { id: Number(userId) },
+      post: { id: Number(postId) },
     }
 
-    return this.http
-      .post<any>(`${this.apiUrl}/insertComment`, comment)
-      .pipe(map((comment) => this.mapCommentFromBackend(comment)))
+    return this.http.post<any>(`${this.apiUrl}/insertComment`, comment).pipe(
+      map((response) => {
+        const mappedComment = this.mapCommentFromBackend(response)
+        if (!mappedComment.postId) {
+          mappedComment.postId = postId
+        }
+        return mappedComment
+      }),
+    )
   }
 
   /**
@@ -60,7 +76,10 @@ export class CommentService {
    */
   deleteComment(id: string): Observable<string> {
     const params = new HttpParams().set("id", id)
-    return this.http.delete<string>(`${this.apiUrl}/deleteComment`, { params })
+    return this.http.delete<string>(`${this.apiUrl}/deleteComment`, {
+      params,
+      responseType: "text" as "json",
+    })
   }
 
   /**
@@ -69,7 +88,10 @@ export class CommentService {
   voteComment(commentId: string, upvote: boolean, userId: string): Observable<string> {
     const params = new HttpParams().set("commentId", commentId).set("upvote", upvote.toString()).set("userId", userId)
 
-    return this.http.post<string>(`${this.apiUrl}/vote`, null, { params })
+    return this.http.post<string>(`${this.apiUrl}/vote`, null, {
+      params,
+      responseType: "text" as "json",
+    })
   }
 
   /**
@@ -79,7 +101,10 @@ export class CommentService {
     const params = new HttpParams().set("commentId", commentId).set("userId", userId)
 
     return this.http
-      .put<any>(`${this.apiUrl}/editComment`, newText, { params })
+      .put<any>(`${this.apiUrl}/editComment`, newText, {
+        params,
+        headers: { "Content-Type": "text/plain" },
+      })
       .pipe(map((comment) => this.mapCommentFromBackend(comment)))
   }
 
@@ -95,13 +120,38 @@ export class CommentService {
    * Map a backend comment to the frontend Comment interface
    */
   private mapCommentFromBackend(backendComment: any): Comment {
+    let postId = ""
+    if (backendComment.post?.id) {
+      postId = backendComment.post.id.toString()
+    } else if (backendComment.post_id) {
+      postId = backendComment.post_id.toString()
+    }
+
+    let userId = ""
+    let username = "Unknown User"
+
+    if (backendComment.user) {
+      userId = backendComment.user.id?.toString() || ""
+      username = backendComment.user.username || backendComment.user.email || "Unknown User"
+    } else if (backendComment.user_id) {
+      userId = backendComment.user_id.toString()
+    }
+
+    if (username === "Unknown User" && backendComment.username) {
+      username = backendComment.username
+    }
+
     return {
-      id: backendComment.id.toString(),
-      userId: backendComment.user_id.toString(),
-      username: backendComment.username || "Unknown User",
+      id: backendComment.id?.toString() || "",
+      userId: userId,
+      username: username,
       text: backendComment.text || "",
-      timestamp: new Date(backendComment.created_at || new Date()),
+      timestamp: new Date(backendComment.post_date || backendComment.created_at || new Date()),
       score: backendComment.score || 0,
+      postId: postId,
+      post_date: new Date(backendComment.post_date || new Date()),
+      user: backendComment.user,
+      post: backendComment.post,
     }
   }
 
@@ -118,11 +168,10 @@ export class CommentService {
   private mapCommentToBackend(comment: Comment): any {
     return {
       id: comment.id ? Number.parseInt(comment.id) : null,
-      user_id: comment.userId ? Number.parseInt(comment.userId) : null,
-      post_id: comment.postId ? Number.parseInt(comment.postId) : null,
+      user: comment.user || { id: Number.parseInt(comment.userId) },
+      post: comment.post || { id: Number.parseInt(comment.postId || "") },
       text: comment.text || "",
-      created_at: comment.timestamp || new Date(),
-      score: comment.score || 0,
+      post_date: comment.post_date || comment.timestamp || new Date(),
     }
   }
 }

@@ -66,13 +66,13 @@
           <div class="post-time">{{ post.createdAt | date:'medium' }}</div>
         </div>
       </div>
-      <div class="post-actions" *ngIf="post.authorId === currentUserId">
+      <div class="post-actions" *ngIf="isPostOwner(post)">
         <button pButton icon="pi pi-pencil" class="p-button-text p-button-rounded" (click)="editPost(post)"></button>
         <button pButton icon="pi pi-trash" class="p-button-text p-button-rounded p-button-danger" (click)="confirmDeletePost(post)"></button>
       </div>
     </div>
 
-    <img [src]="post.imageUrl || '/placeholder.svg?height=600&width=600&query=Instagram post'" alt="Post image" class="post-image">
+    <img [src]="post.imageUrl || '/placeholder.svg?height=600&width=600'" alt="Post image" class="post-image">
 
     <div class="post-content">
       <div class="post-title">{{ post.title }}</div>
@@ -83,11 +83,6 @@
         </span>
       </div>
       <div class="post-status">Status: {{ post.status }}</div>
-      
-      <!-- Debug information - remove this in production -->
-      <div class="debug-info" style="background: #f0f0f0; padding: 5px; margin: 5px 0; font-size: 12px;">
-        <strong>Debug:</strong> Likes: {{ post.likes }}, LikerIds: {{ post.likerIds | json }}, Comments: {{ post.comments?.length || 0 }}
-      </div>
     </div>
 
     <div class="post-footer">
@@ -110,52 +105,158 @@
     </div>
 
     <div class="post-comment-section" *ngIf="post.showComments">
-      <!-- Debug: Show if comments array exists -->
-      <div style="background: #e8f4f8; padding: 5px; margin: 5px 0; font-size: 12px;">
-        <strong>Comments Debug:</strong> Array length: {{ post.comments?.length || 0 }}, 
-        Show comments: {{ post.showComments }}, 
-        Comments exist: {{ !!post.comments }}
-      </div>
-      
-      <div *ngFor="let comment of post.comments; trackBy: trackByCommentId" class="post-comment">
-        <p-inplace #inplace [style]="{'width': '100%'}">
-          <ng-template pTemplate="display">
-            <div class="comment-display-container">
-              <div>
-                <span class="post-comment-username">{{ comment.username }}</span>
-                <span class="post-comment-text">{{ comment.text }}</span>
+      <!-- Comments List -->
+      <div *ngIf="post.comments && post.comments.length > 0">
+        <div *ngFor="let comment of post.comments; trackBy: trackByCommentId" class="post-comment">
+          <p-inplace #inplace [style]="{'width': '100%'}">
+            <ng-template pTemplate="display">
+              <div class="comment-display-container">
+                <div class="comment-content">
+                  <span class="post-comment-username">{{ comment.username }}</span>
+                  <span class="post-comment-text">{{ comment.text }}</span>
+                </div>
+                <div class="comment-meta">
+                  <small class="comment-timestamp">{{ comment.timestamp | date:'short' }}</small>
+                  <div class="comment-actions" *ngIf="isCommentOwner(comment)">
+                    <button pButton icon="pi pi-pencil" 
+                      class="p-button-text p-button-rounded p-button-sm"
+                      (click)="inplace.activate()"
+                      pTooltip="Edit comment"></button>
+                    <button pButton icon="pi pi-trash" 
+                      class="p-button-text p-button-rounded p-button-danger p-button-sm" 
+                      (click)="deleteComment(comment)"
+                      pTooltip="Delete comment"></button>
+                  </div>
+                </div>
               </div>
-            </div>
-          </ng-template>
-          <ng-template pTemplate="content">
-            <div class="comment-edit-form-inplace">
-              <input #editedCommentInput type="text" class="post-comment-input" [value]="comment.text" (keyup.enter)="inplace.deactivate(); editComment(comment, editedCommentInput.value)">
-              <div class="comment-edit-actions">
-                <button pButton icon="pi pi-check" class="p-button-rounded p-button-sm"
-                  (click)="inplace.deactivate(); editComment(comment, editedCommentInput.value)"></button>
-                <button pButton icon="pi pi-times" class="p-button-rounded p-button-text p-button-sm"
-                  (click)="inplace.deactivate()"></button>
+            </ng-template>
+            <ng-template pTemplate="content">
+              <div class="comment-edit-form-inplace">
+                <input #editedCommentInput 
+                  type="text" 
+                  class="post-comment-input" 
+                  [value]="comment.text" 
+                  (keyup.enter)="inplace.deactivate(); editComment(comment, editedCommentInput.value)"
+                  (keyup.escape)="inplace.deactivate()">
+                <div class="comment-edit-actions">
+                  <button pButton icon="pi pi-check" 
+                    class="p-button-rounded p-button-sm"
+                    (click)="inplace.deactivate(); editComment(comment, editedCommentInput.value)"
+                    pTooltip="Save changes"></button>
+                  <button pButton icon="pi pi-times" 
+                    class="p-button-rounded p-button-text p-button-sm"
+                    (click)="inplace.deactivate()"
+                    pTooltip="Cancel"></button>
+                </div>
               </div>
-            </div>
-          </ng-template>
-        </p-inplace>
+            </ng-template>
+          </p-inplace>
 
-        <div class="comment-footer">
-          <div class="comment-votes">
-            <button pButton icon="pi pi-chevron-up" class="p-button-text p-button-rounded p-button-sm" (click)="upvoteComment(comment)"></button>
-            <span class="comment-score">{{ comment.score || 0 }}</span>
-            <button pButton icon="pi pi-chevron-down" class="p-button-text p-button-rounded p-button-sm" (click)="downvoteComment(comment)"></button>
+          <!-- Comment Voting -->
+          <div class="comment-footer">
+            <div class="comment-votes">
+              <button pButton icon="pi pi-chevron-up" 
+                class="p-button-text p-button-rounded p-button-sm" 
+                (click)="upvoteComment(comment)"
+                pTooltip="Upvote"></button>
+              <span class="comment-score">{{ comment.score || 0 }}</span>
+              <button pButton icon="pi pi-chevron-down" 
+                class="p-button-text p-button-rounded p-button-sm" 
+                (click)="downvoteComment(comment)"
+                pTooltip="Downvote"></button>
+            </div>
           </div>
-          <button *ngIf="comment.userId === currentUserId" pButton icon="pi pi-trash" class="p-button-text p-button-rounded p-button-danger p-button-sm" (click)="deleteComment(comment)"></button>
         </div>
       </div>
+      
+      <!-- No comments message -->
+      <div *ngIf="!post.comments || post.comments.length === 0" class="no-comments-message">
+        No comments yet. Be the first to comment!
+      </div>
 
+      <!-- Add New Comment Form -->
       <div class="post-comment-form">
-        <input type="text" class="post-comment-input" [(ngModel)]="post.newComment"
-          placeholder="Add a comment..." (keyup.enter)="addComment(post)">
-        <button pButton icon="pi pi-send" class="p-button-rounded"
-          (click)="addComment(post)"></button>
+        <input type="text" 
+          class="post-comment-input" 
+          [(ngModel)]="post.newComment"
+          placeholder="Add a comment..." 
+          (keyup.enter)="addComment(post)"
+          maxlength="500">
+        <button pButton icon="pi pi-send" 
+          class="p-button-rounded"
+          (click)="addComment(post)"
+          [disabled]="!post.newComment?.trim()"
+          pTooltip="Post comment"></button>
       </div>
     </div>
   </div>
+  
+  <!-- Loading indicator -->
+  <div *ngIf="loading" class="loading-container">
+    <p-progressSpinner styleClass="w-4rem h-4rem" strokeWidth="8" fill="var(--surface-ground)" animationDuration=".5s"></p-progressSpinner>
+    <div class="loading-text">Loading posts...</div>
+  </div>
+  
+  <!-- No posts message -->
+  <div *ngIf="!loading && (!posts || posts.length === 0)" class="no-posts-message">
+    <i class="pi pi-inbox" style="font-size: 3rem"></i>
+    <div>No posts found</div>
+  </div>
 </div>
+
+<!-- Edit Post Dialog -->
+<p-dialog
+  [(visible)]="displayEditDialog"
+  header="Edit Post"
+  [modal]="true"
+  [style]="{width: '50vw'}"
+  [draggable]="false"
+  [resizable]="false"
+  styleClass="post-dialog"
+  (onHide)="hideEditDialog()"
+>
+  <div class="p-fluid">
+    <div class="field">
+      <label for="edit-title">Title</label>
+      <input id="edit-title" type="text" pInputText [(ngModel)]="postForm.title" required />
+    </div>
+
+    <div class="field">
+      <label for="edit-text">Description</label>
+      <textarea id="edit-text" pInputTextarea [(ngModel)]="postForm.text" rows="5" required></textarea>
+    </div>
+
+    <div class="field">
+      <label>Current Image</label>
+      <div class="current-image-container" *ngIf="postForm.imageUrl">
+        <img [src]="postForm.imageUrl" class="current-image" alt="Current post image" />
+      </div>
+      
+      <label>Upload New Image (optional)</label>
+      <div class="file-upload-container">
+        <label for="edit-file-upload" class="custom-file-upload">
+          <i class="pi pi-upload"></i> Upload New Image
+        </label>
+        <input id="edit-file-upload" type="file" accept="image/*" style="display:none" (change)="onImageSelected($event)" />
+      </div>
+
+      <div class="image-preview-container" *ngIf="imagePreviewUrl">
+        <img [src]="imagePreviewUrl" class="image-preview" alt="Preview" />
+      </div>
+    </div>
+
+    <div class="field">
+      <label for="edit-tags">Tags</label>
+      <input id="edit-tags" type="text" pInputText [(ngModel)]="tagsText" placeholder="e.g., travel, food, nature" />
+      <small class="helper-text">Separate tags with commas</small>
+    </div>
+  </div>
+
+  <ng-template pTemplate="footer">
+    <button pButton pRipple label="Cancel" icon="pi pi-times" class="p-button-text" (click)="hideEditDialog()"></button>
+    <button pButton pRipple label="Update" icon="pi pi-check" class="purple-button" (click)="savePostForm()"></button>
+  </ng-template>
+</p-dialog>
+
+<p-toast></p-toast>
+<p-confirmDialog></p-confirmDialog>
