@@ -1,8 +1,9 @@
-import { Component, EventEmitter, Input, OnInit, Output } from "@angular/core";
+import { Component, EventEmitter, Input, OnInit, Output, ViewChild, ElementRef } from "@angular/core";
 import { ConfirmationService, MessageService } from "primeng/api";
 import { PostService } from "../../services/post.service";
 import { TagService } from "../../services/tag.service";
 import { CommentService } from "../../services/comment.service";
+import { Observable } from "rxjs";
 // Import the interfaces from your file
 import { Post, Tag, Comment } from "../../interfaces/post.interface";
 
@@ -64,6 +65,7 @@ export class FeedFormComponent implements OnInit {
   // Use the PostViewModel for our component's state
   posts: PostViewModel[] = [];
   currentUserId = "";
+  currentUsername = ""; // <-- add this line
   tags: Tag[] = [];
   selectedTag: Tag | null = null;
 
@@ -90,6 +92,24 @@ export class FeedFormComponent implements OnInit {
   selectedFileName = "";
   imagePreviewUrl: string | ArrayBuffer | null = null;
 
+  sortOptions = [
+    { label: "Sort by Score", value: "score" },
+    { label: "Sort by Date", value: "date" }
+  ];
+  selectedSort = "score";
+  onlyMine = false;
+
+  // Search functionality
+  searchText: string = "";
+  searchType: "tag" | "username" | "title" = "tag";
+  searchOptions = [
+    { label: "Tag", value: "tag" },
+    { label: "Username", value: "username" },
+    { label: "Title", value: "title" }
+  ];
+
+  @ViewChild('searchInput') searchInputRef!: ElementRef<HTMLInputElement>;
+
   constructor(
     private postService: PostService,
     private tagService: TagService,
@@ -100,54 +120,108 @@ export class FeedFormComponent implements OnInit {
 
   ngOnInit(): void {
     this.currentUserId = this.postService.getCurrentUserId();
+    // Add this line to get the current user's username
+    this.currentUsername = this.postService.authService.getCurrentUser()?.username || "";
     this.loadPosts();
     this.loadTags();
   }
 
-loadPosts(): void {
-  console.log("1. Starting loadPosts()..."); 
-  
-  this.postService.getPosts().subscribe({
-    next: (postsFromBackend) => {
-      console.log("2. Raw data from backend:", postsFromBackend); 
+  loadPosts(): void {
+    if (this.onlyMine) {
+      this.postService.getPostsFilteredByUsername(this.currentUsername).subscribe({
+        next: (posts: Post[]) => this.setPosts(posts),
+        error: (error: any) => this.showError("Failed to load posts: " + error.message),
+      });
+      return;
+    }
 
-      this.posts = postsFromBackend.map(post => {
-        // More detailed logging for each post
-        console.log(`Post ID ${post.id}:`, {
-          likes: post.likes,
-          likerIds: (post as any).likerIds,
-          comments: post.comments,
-          commentsCount: post.comments?.length || 0
-        });
+    let postsObservable: Observable<Post[]>;
+    if (this.selectedSort === "score") {
+      postsObservable = this.postService.getSortedPosts();
+    } else if (this.selectedSort === "date") {
+      postsObservable = this.postService.getPostsSortedByDate();
+    } else {
+      postsObservable = this.postService.getPosts();
+    }
 
-        return {
+    postsObservable.subscribe({
+      next: (posts: Post[]) => this.setPosts(posts),
+      error: (error: any) => this.showError("Failed to load posts: " + error.message),
+    });
+
+    if (this.searchText.trim() !== "") {
+      this.searchPosts();
+    }
+  }
+
+  private setPosts(posts: Post[]): void {
+    this.posts = posts.map(post => ({
+      ...post,
+      likerIds: (post as any).likerIds || [],
+      showComments: false,
+      newComment: "",
+    }));
+  }
+
+  private showError(detail: string): void {
+    this.messageService.add({ severity: "error", summary: "Error", detail });
+  }
+
+  searchPosts(): void {
+    const query = this.searchText.trim();
+    if (!query) {
+      this.loadPosts();
+      return;
+    }
+    let obs: Observable<Post[]>;
+    if (this.searchType === "tag") {
+      obs = this.postService.getPostsByTag(query);
+    } else if (this.searchType === "username") {
+      obs = this.postService.getPostsFilteredByUsername(query);
+    } else {
+      obs = this.postService.getPostsFilteredByTitle(query);
+    }
+    obs.subscribe({
+      next: (posts: Post[]) => {
+        this.posts = posts.map(post => ({
           ...post,
-          // Ensure likerIds is always an array
-          likerIds: Array.isArray((post as any).likerIds) ? (post as any).likerIds : [],
+          likerIds: (post as any).likerIds || [],
           showComments: false,
           newComment: "",
-          // Ensure comments is always an array and properly typed
-          comments: Array.isArray(post.comments) ? post.comments.map(comment => ({
-            ...comment,
-            editing: false,
-            editText: ""
-          })) : []
-        };
+        }));
+      },
+      error: (error: any) => {
+        this.messageService.add({
+          severity: "error",
+          summary: "Error",
+          detail: "Failed to search posts: " + error.message,
+        });
+      }
+    });
+  }
+
+  onSortChange(event: any): void {
+    this.selectedSort = event.value;
+    this.loadPosts();
+  }
+
+  onToggleOnlyMine(): void {
+    this.onlyMine = !this.onlyMine;
+
+    // Always get the current username from /users/me
+    this.postService.authService
+      .getCurrentUserFromApi()
+      .subscribe({
+        next: (user: any) => { // <-- add type annotation here
+          this.currentUsername = user?.username || "";
+          this.loadPosts();
+        },
+        error: () => {
+          this.currentUsername = "";
+          this.loadPosts();
+        }
       });
-      
-      console.log("3. Final mapped posts:", this.posts);
-    },
-    error: (error) => {
-      console.error("ERROR in loadPosts():", error); 
-      
-      this.messageService.add({
-        severity: "error",
-        summary: "Error",
-        detail: "Failed to load posts: " + error.message,
-      });
-    },
-  });
-}
+  }
 
   loadTags(): void {
     this.tagService.getTags().subscribe({
@@ -504,7 +578,26 @@ addComment(post: PostViewModel): void {
     });
   }
 
-  trackByCommentId(index: number, comment: Comment): string {
-  return comment.id;
-}
+  onSearchButton(): void {
+    this.searchPosts();
+  }
+
+  onSearchInputKeydown(event: KeyboardEvent): void {
+    if (event.key === "Enter") {
+      this.searchPosts();
+    }
+  }
+
+  onSearchTypeChange(event: any): void {
+    this.searchType = event.value;
+    // Optionally clear search text or trigger search
+  }
+
+  clearSearch(): void {
+    this.searchText = "";
+    this.loadPosts();
+    if (this.searchInputRef) {
+      this.searchInputRef.nativeElement.value = "";
+    }
+  }
 }

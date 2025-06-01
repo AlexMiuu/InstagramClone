@@ -1,18 +1,17 @@
 package proiect.proiectPs.service;
 
-import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import proiect.proiectPs.entity.User;
-import proiect.proiectPs.repository.UserRepository;
-
 import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import org.junit.jupiter.api.Test;
 import static org.mockito.Mockito.when;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+
+import proiect.proiectPs.entity.User;
+import proiect.proiectPs.repository.UserRepository;
 
 @SpringBootTest
 class UserServiceTest {
@@ -26,8 +25,26 @@ class UserServiceTest {
     @Test
     void testRetrieveAllUsers() {
         // Arrange
-        User user1 = new User(1L, "user1@example.com", null, false, false);
-        User user2 = new User(2L, "user2@example.com", null, false, false);
+        User user1 = new User(
+            1L,
+            "user1@example.com",
+            null,
+            false,
+            false,
+            "pass1",
+            "user1",
+            "1234567890"
+        );
+        User user2 = new User(
+            2L,
+            "user2@example.com",
+            null,
+            false,
+            false,
+            "pass2",
+            "user2",
+            "0987654321"
+        );
         List<User> mockUsers = Arrays.asList(user1, user2);
 
         when(userRepository.findAll()).thenReturn(mockUsers);

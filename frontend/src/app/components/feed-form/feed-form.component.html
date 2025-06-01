@@ -4,6 +4,57 @@
       icon="pi pi-refresh"
       styleClass="p-button-rounded p-button-outlined"
       (onClick)="loadPosts()"></p-button>
+
+    <!-- Search Bar, Dropdown, and Button -->
+    <input #searchInput
+      type="text"
+      class="filter-input"
+      placeholder="Search..."
+      [(ngModel)]="searchText"
+      (keydown)="onSearchInputKeydown($event)"
+      style="margin-left:10px; width:200px;" />
+
+    <p-dropdown
+      [options]="searchOptions"
+      [(ngModel)]="searchType"
+      (onChange)="onSearchTypeChange($event)"
+      styleClass="p-button-rounded p-button-outlined"
+      [showClear]="false"
+      [autoDisplayFirst]="true"
+      [style]="{'margin-left':'10px', 'width':'120px'}"
+      placeholder="Search by"
+    ></p-dropdown>
+
+    <p-button
+      label="Search"
+      icon="pi pi-search"
+      styleClass="p-button-rounded p-button-outlined"
+      (onClick)="onSearchButton()"
+      [style]="{'margin-left':'10px'}"
+    ></p-button>
+
+    <!-- Sort Dropdown -->
+    <p-dropdown 
+      [options]="sortOptions" 
+      [(ngModel)]="selectedSort"
+      (onChange)="onSortChange($event)"
+      styleClass="p-button-rounded p-button-outlined"
+      [showClear]="false"
+      [autoDisplayFirst]="true"
+      [style]="{'margin-left':'10px', 'width':'180px'}"
+      placeholder="Sort by"
+    ></p-dropdown>
+
+    <!-- Only My Posts Toggle -->
+    <button 
+      pButton 
+      [label]="onlyMine ? 'Show All Posts' : 'Show Only My Posts'"
+      [icon]="onlyMine ? 'pi pi-user' : 'pi pi-users'"
+      styleClass="p-button-rounded p-button-outlined"
+      [class.p-button-info]="onlyMine"
+      (click)="onToggleOnlyMine()"
+      [style]="{'margin-left':'10px'}"
+    ></button>
   </div>
 
   <div *ngFor="let post of posts" class="post-card">
@@ -24,7 +75,7 @@
     <img [src]="post.imageUrl || '/placeholder.svg?height=600&width=600&query=Instagram post'" alt="Post image" class="post-image">
 
     <div class="post-content">
-      <div class="post-title">{{ post.title }}</div> <!-- Fixed CSS class syntax -->
+      <div class="post-title">{{ post.title }}</div>
       <div class="post-text">{{ post.text }}</div>
       <div class="post-tags">
         <span *ngFor="let tag of post.tags" class="post-tag" (click)="filterByTag(tag)">
@@ -49,7 +100,7 @@
 
       <div class="post-interaction">
         <button pButton icon="pi pi-heart" 
-          [ngClass]="{'liked': post.likerIds?.includes(currentUserId)}"
+          [ngClass]="{'liked': post.likerIds.includes(currentUserId)}"
           class="p-button-text p-button-rounded" 
           (click)="likePost(post)"></button>
         <button pButton icon="pi pi-comment" 

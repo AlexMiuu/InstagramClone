@@ -6,7 +6,6 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -23,7 +22,7 @@ import org.springframework.web.multipart.MultipartFile;
 import proiect.proiectPs.entity.Post;
 import proiect.proiectPs.service.PostService;
 
-@CrossOrigin(origins = "http://localhost:4200")
+
 @RestController
 @RequestMapping("/posts")
 public class PostController {
@@ -38,8 +37,13 @@ public class PostController {
 
     @PostMapping("/insertPost")
     @ResponseBody
-    public Post insertPost(@RequestBody Post post) {
-        return this.postService.insertPost(post);
+    public ResponseEntity<?> insertPost(@RequestBody Post post) {
+        try {
+            Post createdPost = this.postService.insertPost(post);
+            return ResponseEntity.ok(createdPost);
+        } catch (Exception e) {
+            return ResponseEntity.status(401).body("Unauthorized or invalid request: " + e.getMessage());
+        }
     }
 
     @PutMapping("/updatePost")
@@ -117,5 +121,29 @@ public class PostController {
             System.out.println("No image file received.");
         }
         return this.postService.createPostWithImage(post, tags, imageFile);
+    }
+
+    @GetMapping("/score")
+    @ResponseBody
+    public int getPostScore(@RequestParam Long postId) {
+        return this.postService.getPostScore(postId);
+    }
+
+    @GetMapping("/sortedByDate")
+    @ResponseBody
+    public List<Post> getPostsSortedByDate() {
+        return this.postService.getPostsSortedByDate();
+    }
+
+    @GetMapping("/filterByTitle")
+    @ResponseBody
+    public List<Post> getPostsFilteredByTitle(@RequestParam String search) {
+        return this.postService.getPostsFilteredByTitle(search);
+    }
+
+    @GetMapping("/filterByUsername")
+    @ResponseBody
+    public List<Post> getPostsFilteredByUsername(@RequestParam String username) {
+        return this.postService.getPostsFilteredByUsername(username);
     }
 }

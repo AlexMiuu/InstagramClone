@@ -25,17 +25,22 @@ public class UserService {
     private UserVotedPostRepository userVotedPostRepository;
     @Autowired
     private UserVotedCommentRepository userVotedCommentRepository;
+    @Autowired
+    private BanNotificationService banNotificationService;
 
     public List<User> retrieveAllUsers() {
         return (List<User>) this.userRepository.findAll();
     }
 
     public User insertUser(User user) {
+        System.out.println("Registering user: " + user.getEmail());
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         // Prevent privilege escalation on registration
         user.setIs_admin(false);
         user.setIs_blocked(false);
-        return this.userRepository.save(user);
+        User saved = this.userRepository.save(user);
+        System.out.println("User registered with hashed password: " + saved.getPassword());
+        return saved;
     }
 
     public String deleteUserById(Long id) {
@@ -65,6 +70,7 @@ public class UserService {
         }
 
         if (user.getEmail() != null) existingUser.setEmail(user.getEmail());
+        if (user.getUsername() != null) existingUser.setUsername(user.getUsername());
         if (user.getPassword() != null && !user.getPassword().isEmpty()) {
             existingUser.setPassword(passwordEncoder.encode(user.getPassword()));
         }
@@ -88,6 +94,9 @@ public class UserService {
         if (user == null) return "User not found";
         user.setIs_blocked(true);
         userRepository.save(user);
+
+        banNotificationService.notifyBan(user.getEmail(), user.getPhoneNumber());
+
         return "User banned";
     }
 

@@ -1,0 +1,239 @@
+<app-feed-form-header></app-feed-form-header>
+
+<div class="admin-container">
+  <div class="admin-header">
+    <h1>Admin Control Panel</h1>
+    <p class="admin-subtitle">Manage users, posts, and comments</p>
+  </div>
+
+  <p-tabView [(activeIndex)]="activeIndex">
+    <!-- Users Tab -->
+    <p-tabPanel header="Users" leftIcon="pi pi-users">
+      <div class="tab-content">
+        <div class="search-section">
+          <span class="p-input-icon-left">
+            <i class="pi pi-search"></i>
+            <input 
+              type="text" 
+              pInputText 
+              [(ngModel)]="userSearchText" 
+              (input)="searchUsers()"
+              placeholder="Search users by email or ID..." 
+              class="search-input"
+            />
+          </span>
+          <button 
+            pButton 
+            icon="pi pi-refresh" 
+            class="p-button-rounded p-button-outlined"
+            (click)="loadUsers()"
+            pTooltip="Refresh users"
+          ></button>
+        </div>
+
+        <p-table 
+          [value]="filteredUsers" 
+          [paginator]="true" 
+          [rows]="10"
+          [loading]="loading"
+          styleClass="p-datatable-striped"
+          [rowsPerPageOptions]="[10, 25, 50]"
+        >
+          <ng-template pTemplate="header">
+            <tr>
+              <th>ID</th>
+              <th>Email</th>
+              <th>Registration Date</th>
+              <th>Admin</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="body" let-user>
+            <tr>
+              <td>{{ user.id }}</td>
+              <td>{{ user.email }}</td>
+              <td>{{ formatDate(user.date_of_birth) }}</td>
+              <td>
+                <i class="pi" [ngClass]="user.is_admin ? 'pi-check-circle' : 'pi-times-circle'"
+                   [style.color]="user.is_admin ? '#8a2be2' : '#666'"></i>
+              </td>
+              <td>
+                <p-tag 
+                  [value]="getUserStatusLabel(user.is_blocked)" 
+                  [severity]="getUserStatusSeverity(user.is_blocked)"
+                ></p-tag>
+              </td>
+              <td>
+                <button 
+                  pButton 
+                  [icon]="user.is_blocked ? 'pi pi-unlock' : 'pi pi-lock'"
+                  class="p-button-rounded p-button-sm"
+                  [class.p-button-warning]="!user.is_blocked"
+                  [class.p-button-success]="user.is_blocked"
+                  (click)="toggleUserBan(user)"
+                  [pTooltip]="user.is_blocked ? 'Unban user' : 'Ban user'"
+                  [disabled]="user.is_admin"
+                ></button>
+                <button 
+                  pButton 
+                  icon="pi pi-trash"
+                  class="p-button-rounded p-button-danger p-button-sm ml-2"
+                  (click)="deleteUser(user)"
+                  pTooltip="Delete user"
+                  [disabled]="user.is_admin"
+                ></button>
+              </td>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="emptymessage">
+            <tr>
+              <td colspan="6" class="text-center">No users found</td>
+            </tr>
+          </ng-template>
+        </p-table>
+      </div>
+    </p-tabPanel>
+
+    <!-- Posts Tab -->
+    <p-tabPanel header="Posts" leftIcon="pi pi-images">
+      <div class="tab-content">
+        <div class="search-section">
+          <span class="p-input-icon-left">
+            <i class="pi pi-search"></i>
+            <input 
+              type="text" 
+              pInputText 
+              [(ngModel)]="postSearchText" 
+              (input)="searchPosts()"
+              placeholder="Search posts..." 
+              class="search-input"
+            />
+          </span>
+          <button 
+            pButton 
+            icon="pi pi-refresh" 
+            class="p-button-rounded p-button-outlined"
+            (click)="loadPosts()"
+            pTooltip="Refresh posts"
+          ></button>
+        </div>
+
+        <p-table 
+          [value]="filteredPosts" 
+          [paginator]="true" 
+          [rows]="10"
+          styleClass="p-datatable-striped"
+          [rowsPerPageOptions]="[10, 25, 50]"
+        >
+          <ng-template pTemplate="header">
+            <tr>
+              <th>ID</th>
+              <th>Title</th>
+              <th>Author</th>
+              <th>Created</th>
+              <th>Likes</th>
+              <th>Comments</th>
+              <th>Actions</th>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="body" let-post>
+            <tr>
+              <td>{{ post.id }}</td>
+              <td class="post-title-cell">{{ post.title }}</td>
+              <td>{{ post.authorUsername }}</td>
+              <td>{{ formatDate(post.createdAt) }}</td>
+              <td>{{ post.likes }}</td>
+              <td>{{ post.comments.length }}</td>
+              <td>
+                <button 
+                  pButton 
+                  icon="pi pi-trash"
+                  class="p-button-rounded p-button-danger p-button-sm"
+                  (click)="deletePost(post)"
+                  pTooltip="Delete post"
+                ></button>
+              </td>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="emptymessage">
+            <tr>
+              <td colspan="7" class="text-center">No posts found</td>
+            </tr>
+          </ng-template>
+        </p-table>
+      </div>
+    </p-tabPanel>
+
+    <!-- Comments Tab -->
+    <p-tabPanel header="Comments" leftIcon="pi pi-comments">
+      <div class="tab-content">
+        <div class="search-section">
+          <span class="p-input-icon-left">
+            <i class="pi pi-search"></i>
+            <input 
+              type="text" 
+              pInputText 
+              [(ngModel)]="commentSearchText" 
+              (input)="searchComments()"
+              placeholder="Search comments..." 
+              class="search-input"
+            />
+          </span>
+          <button 
+            pButton 
+            icon="pi pi-refresh" 
+            class="p-button-rounded p-button-outlined"
+            (click)="loadComments()"
+            pTooltip="Refresh comments"
+          ></button>
+        </div>
+
+        <p-table 
+          [value]="filteredComments" 
+          [paginator]="true" 
+          [rows]="10"
+          styleClass="p-datatable-striped"
+          [rowsPerPageOptions]="[10, 25, 50]"
+        >
+          <ng-template pTemplate="header">
+            <tr>
+              <th>ID</th>
+              <th>Comment</th>
+              <th>Author</th>
+              <th>Created</th>
+              <th>Score</th>
+              <th>Actions</th>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="body" let-comment>
+            <tr>
+              <td>{{ comment.id }}</td>
+              <td class="comment-text-cell">{{ comment.text }}</td>
+              <td>{{ comment.username }}</td>
+              <td>{{ formatDate(comment.timestamp) }}</td>
+              <td>{{ comment.score || 0 }}</td>
+              <td>
+                <button 
+                  pButton 
+                  icon="pi pi-trash"
+                  class="p-button-rounded p-button-danger p-button-sm"
+                  (click)="deleteComment(comment)"
+                  pTooltip="Delete comment"
+                ></button>
+              </td>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="emptymessage">
+            <tr>
+              <td colspan="6" class="text-center">No comments found</td>
+            </tr>
+          </ng-template>
+        </p-table>
+      </div>
+    </p-tabPanel>
+  </p-tabView>
+</div>
+
+<p-toast></p-toast>
+<p-confirmDialog></p-confirmDialog>

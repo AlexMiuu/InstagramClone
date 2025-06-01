@@ -6,12 +6,21 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 
 import proiect.proiectPs.entity.User;
 import proiect.proiectPs.service.UserService;
 
-@CrossOrigin(origins = "http://localhost:4200")
+// Add allowCredentials and allowedHeaders for CORS
+
 @RestController
 @RequestMapping("/users")
 public class UserController {
@@ -21,6 +30,10 @@ public class UserController {
     @GetMapping("/getAll")
     @ResponseBody
     public List<User> retrieveAllUsers() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !auth.isAuthenticated() || auth.getPrincipal().equals("anonymousUser")) {
+            return null;
+        }
         return this.userService.retrieveAllUsers();
     }
 
@@ -28,13 +41,17 @@ public class UserController {
     public ResponseEntity<User> getCurrentUser() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth == null || !auth.isAuthenticated() || auth.getPrincipal().equals("anonymousUser")) {
+            System.out.println("/users/me: Not authenticated");
             return ResponseEntity.status(401).build();
         }
         String email = auth.getName();
+        System.out.println("/users/me: auth.getName() = " + email);
         User user = userService.findByEmail(email);
         if (user == null) {
+            System.out.println("/users/me: No user found for email: " + email);
             return ResponseEntity.notFound().build();
         }
+        System.out.println("/users/me: Found user id=" + user.getId());
         return ResponseEntity.ok(user);
     }
 

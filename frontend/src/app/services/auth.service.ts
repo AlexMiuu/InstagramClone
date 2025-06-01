@@ -20,6 +20,7 @@ export class AuthService {
   }
 
   login(email: string, password: string): Observable<string> {
+    this.clearToken();
     return this.http.post<string>(`${this.apiUrl}/login`, { email, password }, { responseType: "text" as "json" }).pipe(
       tap((token) => {
         this.setToken(token)
@@ -29,12 +30,17 @@ export class AuthService {
   }
 
   register(user: User): Observable<string> {
+    this.clearToken();
     return this.http.post<string>(`${this.apiUrl}/register`, user, { responseType: "text" as "json" })
   }
 
   logout(): void {
-    localStorage.removeItem(this.tokenKey)
-    this.currentUserSubject.next(null)
+    this.clearToken();
+    this.currentUserSubject.next(null);
+  }
+
+  clearToken(): void {
+    localStorage.removeItem(this.tokenKey);
   }
 
   getToken(): string | null {
@@ -58,5 +64,15 @@ export class AuthService {
 
   getCurrentUser(): User | null {
     return this.currentUserSubject.value
+  }
+
+  // Add this method to fetch the current user from the API and return as Observable
+  getCurrentUserFromApi(): Observable<User | null> {
+    return this.http.get<User>("http://localhost:8080/users/me").pipe(
+      tap({
+        next: (user) => this.currentUserSubject.next(user),
+        error: () => this.currentUserSubject.next(null),
+      })
+    );
   }
 }
