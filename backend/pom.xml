@@ -65,12 +65,13 @@
 			<version>0.9.1</version>
 		</dependency>
 		<!-- Lombok (optional, for annotations like @Data) -->
+		<!--
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
 			<optional>true</optional>
 		</dependency>
-
+		-->
 		<dependency>
 			<groupId>javax.xml.bind</groupId>
 			<artifactId>jaxb-api</artifactId>
