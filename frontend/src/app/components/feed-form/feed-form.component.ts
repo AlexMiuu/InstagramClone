@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, type OnInit, Output, ViewChild, type ElementRef } from "@angular/core"
+import { Component, EventEmitter, Input,  OnInit, Output, ViewChild,  ElementRef } from "@angular/core"
 import { ConfirmationService, MessageService } from "primeng/api"
 import  { PostService } from "../../services/post.service"
 import  { TagService } from "../../services/tag.service"
@@ -164,6 +164,7 @@ export class FeedFormComponent implements OnInit {
       this.postService.getPostsFilteredByUsername(this.currentUsername).subscribe({
         next: (posts: Post[]) => {
           this.setPosts(posts)
+          this.fetchScoresForAllComments() // Fetch scores after posts are set
           this.loading = false
         },
         error: (error: any) => {
@@ -186,6 +187,7 @@ export class FeedFormComponent implements OnInit {
     postsObservable.subscribe({
       next: (posts: Post[]) => {
         this.setPosts(posts)
+        this.fetchScoresForAllComments() // Fetch scores after posts are set
         this.loading = false
       },
       error: (error: any) => {
@@ -195,21 +197,46 @@ export class FeedFormComponent implements OnInit {
     })
 
     if (this.searchText.trim() !== "") {
+      // Note: searchPosts also calls setPosts, so fetchScoresForAllComments will be covered
       this.searchPosts()
+    }
+  }
+
+  private fetchScoresForAllComments(): void {
+    if (this.posts && this.posts.length > 0) {
+      this.posts.forEach((postVM) => {
+        if (postVM.comments && postVM.comments.length > 0) {
+          postVM.comments.forEach((commentVM) => {
+            this.commentService.getCommentScore(commentVM.id).subscribe({
+              next: (updatedScore) => {
+                commentVM.score = updatedScore
+              },
+              error: (err) => {
+                console.warn(`Failed to fetch score for comment ${commentVM.id} during initial load:`, err)
+                // Optionally set to 0 or keep whatever value it had if fetching fails
+                commentVM.score = commentVM.score !== undefined ? commentVM.score : 0
+              },
+            })
+          })
+        }
+      })
     }
   }
 
   private setPosts(posts: Post[]): void {
     console.log("Setting posts:", posts)
     this.posts = posts.map((post) => {
-      const mappedPost = {
+      const mappedPost: PostViewModel = {
         ...post,
         likerIds: Array.isArray((post as any).likerIds) ? (post as any).likerIds : [],
         showComments: false,
         newComment: "",
         comments: Array.isArray(post.comments)
-          ? post.comments.map((comment) => ({
+          ? post.comments.map((comment: any) => ({
+              // Ensure comment is typed if possible
               ...comment,
+              // Score should ideally come from `post.comments` here if PostService provides it
+              // If not, fetchScoresForAllComments will update it.
               editing: false,
               editText: "",
             }))
@@ -229,7 +256,7 @@ export class FeedFormComponent implements OnInit {
     this.loading = true
     const query = this.searchText.trim()
     if (!query) {
-      this.loadPosts()
+      this.loadPosts() // This will call setPosts and then fetchScoresForAllComments
       return
     }
     let obs: Observable<Post[]>
@@ -243,6 +270,7 @@ export class FeedFormComponent implements OnInit {
     obs.subscribe({
       next: (posts: Post[]) => {
         this.setPosts(posts)
+        this.fetchScoresForAllComments() // Fetch scores after search results are set
         this.loading = false
       },
       error: (error: any) => {
@@ -258,7 +286,7 @@ export class FeedFormComponent implements OnInit {
 
   onSortChange(event: any): void {
     this.selectedSort = event.value
-    this.loadPosts()
+    this.loadPosts() // This will call setPosts and then fetchScoresForAllComments
   }
 
   onToggleOnlyMine(): void {
@@ -267,13 +295,12 @@ export class FeedFormComponent implements OnInit {
     // Always get the current username from /users/me
     this.postService.authService.getCurrentUserFromApi().subscribe({
       next: (user: any) => {
-        // <-- add type annotation here
         this.currentUsername = user?.username || ""
-        this.loadPosts()
+        this.loadPosts() // This will call setPosts and then fetchScoresForAllComments
       },
       error: () => {
         this.currentUsername = ""
-        this.loadPosts()
+        this.loadPosts() // This will call setPosts and then fetchScoresForAllComments
       },
     })
   }
@@ -312,6 +339,7 @@ export class FeedFormComponent implements OnInit {
     this.postService.getFilteredPosts(filter).subscribe({
       next: (posts) => {
         this.setPosts(posts)
+        this.fetchScoresForAllComments() // Fetch scores after filters are applied
         this.loading = false
       },
       error: (error) => {
@@ -350,7 +378,13 @@ export class FeedFormComponent implements OnInit {
                   }))
                 : originalState.comments,
             }
-
+            // After liking a post, its comments might have changed or their scores.
+            // It's safer to re-fetch scores for comments of this specific post.
+            if (this.posts[index].comments && this.posts[index].comments.length > 0) {
+              this.posts[index].comments.forEach((commentVM) => {
+                this.commentService.getCommentScore(commentVM.id).subscribe((score) => (commentVM.score = score))
+              })
+            }
             console.log("Updated post in array:", this.posts[index])
           }
         }
@@ -368,6 +402,16 @@ export class FeedFormComponent implements OnInit {
 
   toggleComments(post: PostViewModel): void {
     post.showComments = !post.showComments
+    // If comments are shown and scores might be stale, fetch them.
+    // This is an optimization: only fetch if showing and scores haven't been fetched recently.
+    // For simplicity, we can always re-fetch or rely on the initial fetchScoresForAllComments.
+    // If scores are critical upon every toggle, add a fetch here.
+    if (post.showComments && post.comments && post.comments.length > 0) {
+      post.comments.forEach((commentVM) => {
+        // Potentially only fetch if score is 0 or undefined, or always fetch
+        this.commentService.getCommentScore(commentVM.id).subscribe((score) => (commentVM.score = score))
+      })
+    }
     console.log(
       "Toggled comments for post:",
       post.id,
@@ -407,7 +451,7 @@ export class FeedFormComponent implements OnInit {
         // Reset the input field immediately
         post.newComment = ""
 
-        // Reload posts to get the updated data
+        // Reload posts to get the updated data, which will also trigger fetchScoresForAllComments
         this.loadPosts()
 
         this.messageService.add({
@@ -513,7 +557,7 @@ export class FeedFormComponent implements OnInit {
             detail: "Post updated successfully",
           })
           this.hideEditDialog()
-          this.loadPosts()
+          this.loadPosts() // This will re-trigger fetchScoresForAllComments
           this.postCreated.emit()
         },
         error: (error) => {
@@ -545,7 +589,7 @@ export class FeedFormComponent implements OnInit {
                 summary: "Success",
                 detail: "Post deleted successfully",
               })
-              this.loadPosts()
+              this.loadPosts() // This will re-trigger fetchScoresForAllComments
             } else {
               this.messageService.add({
                 severity: "error",
@@ -567,7 +611,7 @@ export class FeedFormComponent implements OnInit {
     })
   }
 
-  upvoteComment(comment: Comment): void {
+  upvoteComment(comment: CommentViewModel): void {
     // Ensure we have current user ID
     if (!this.currentUserId) {
       const currentUser = this.postService.authService.getCurrentUser()
@@ -613,7 +657,7 @@ export class FeedFormComponent implements OnInit {
     })
   }
 
-  downvoteComment(comment: Comment): void {
+  downvoteComment(comment: CommentViewModel): void {
     if (!this.currentUserId) {
       this.messageService.add({
         severity: "error",
@@ -693,6 +737,8 @@ export class FeedFormComponent implements OnInit {
       next: (updatedComment) => {
         comment.text = updatedComment.text
         comment.editing = false
+        // After editing, the score might not have changed, but good to be consistent
+        this.commentService.getCommentScore(comment.id).subscribe((score) => (comment.score = score))
         this.messageService.add({
           severity: "success",
           summary: "Success",
@@ -718,7 +764,7 @@ export class FeedFormComponent implements OnInit {
       accept: () => {
         this.commentService.deleteComment(comment.id).subscribe({
           next: () => {
-            this.loadPosts() // Reload to refresh the comments
+            this.loadPosts() // Reload to refresh the comments, which will trigger fetchScoresForAllComments
             this.messageService.add({
               severity: "success",
               summary: "Success",
@@ -743,12 +789,12 @@ export class FeedFormComponent implements OnInit {
   }
 
   onSearchButton(): void {
-    this.searchPosts()
+    this.searchPosts() // This will call setPosts and then fetchScoresForAllComments
   }
 
   onSearchInputKeydown(event: KeyboardEvent): void {
     if (event.key === "Enter") {
-      this.searchPosts()
+      this.searchPosts() // This will call setPosts and then fetchScoresForAllComments
     }
   }
 
@@ -759,7 +805,7 @@ export class FeedFormComponent implements OnInit {
 
   clearSearch(): void {
     this.searchText = ""
-    this.loadPosts()
+    this.loadPosts() // This will call setPosts and then fetchScoresForAllComments
     if (this.searchInputRef) {
       this.searchInputRef.nativeElement.value = ""
     }

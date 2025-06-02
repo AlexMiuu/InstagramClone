@@ -28,6 +28,19 @@
           [ngClass]="{'active': currentRoute === '/profile'}"
           (click)="navigateTo('/profile')"
         ></button>
+
+         <button
+        *ngIf="isAdmin"
+        pButton
+        icon="pi pi-shield"
+        class="p-button-rounded p-button-text large-icon"
+        [ngClass]="{'active': currentRoute === '/admin'}"
+        (click)="navigateTo('/admin')"
+        pTooltip="Admin Panel"
+        tooltipPosition="bottom"
+      ></button>
+
+
       </div>
     </ng-template>
   </p-menubar>
