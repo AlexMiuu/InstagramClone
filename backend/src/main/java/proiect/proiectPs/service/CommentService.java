@@ -26,7 +26,7 @@ public class CommentService {
     @Autowired
     private UserRepository userRepository;
 
-    public List<Comment> retrieveAllComments(){
+    public List<Comment> retrieveAllComments() {
         return (List<Comment>) this.commentRepository.findAll();
     }
 

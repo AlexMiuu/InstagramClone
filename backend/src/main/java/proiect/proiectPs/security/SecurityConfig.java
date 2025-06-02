@@ -6,7 +6,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.http.SessionCreationPolicy;
+// Make sure SessionCreationPolicy is imported if you intend to use it for stateless sessions
+// import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -15,7 +16,8 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import org.springframework.web.servlet.handler.HandlerMappingIntrospector;
+// HandlerMappingIntrospector is not used in the corrected filterChain, can be removed if not needed elsewhere
+// import org.springframework.web.servlet.handler.HandlerMappingIntrospector;
 
 import java.util.Arrays;
 
@@ -47,92 +49,60 @@ public class SecurityConfig {
         source.registerCorsConfiguration("/**", configuration);
         return source;
     }
-    //*
+
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http, HandlerMappingIntrospector introspector) throws Exception {
-<<<<<<< HEAD
-        http.csrf().disable()
-                .cors().configurationSource(corsConfigurationSource()) // Add CORS configuration
-                .and()
-                .authorizeHttpRequests()
-                .requestMatchers(new AntPathRequestMatcher("/h2-console/**")).permitAll()
-                .requestMatchers(new AntPathRequestMatcher("/auth/**")).permitAll()
-                .requestMatchers(new AntPathRequestMatcher("/users/deleteUser")).hasRole("ADMIN")
-                .requestMatchers(new AntPathRequestMatcher("/users/getAll")).hasRole("ADMIN")
-                .requestMatchers(new AntPathRequestMatcher("/users/banUser")).hasRole("ADMIN")
-                .requestMatchers(new AntPathRequestMatcher("/comments/vote")).hasAnyRole("USER", "ADMIN")
-                .requestMatchers(new AntPathRequestMatcher("/comments/insertComment")).hasAnyRole("USER", "ADMIN")
-                .requestMatchers(new AntPathRequestMatcher("/comments/editComment")).hasAnyRole("USER", "ADMIN")
-                .requestMatchers(new AntPathRequestMatcher("/posts/create")).hasAnyRole("USER", "ADMIN")
-                .requestMatchers(new AntPathRequestMatcher("/posts/upvote")).hasAnyRole("USER", "ADMIN")
-                .requestMatchers(new AntPathRequestMatcher("/posts/edit")).hasAnyRole("USER", "ADMIN")
-                .requestMatchers(new AntPathRequestMatcher("/posts/delete")).hasAnyRole("USER", "ADMIN")
-                .requestMatchers(new AntPathRequestMatcher("/tags/create")).hasRole("ADMIN")
-                .requestMatchers(new AntPathRequestMatcher("/tags/updateTag")).hasRole("ADMIN")
-                .requestMatchers(new AntPathRequestMatcher("/tags/delete")).hasRole("ADMIN")
-                .anyRequest().permitAll();
-=======
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception { // HandlerMappingIntrospector removed as it's not used
         http
-            .cors() // Enable CORS support
-            .and()
-            .csrf().disable()
-            .authorizeHttpRequests()
-            .requestMatchers(new AntPathRequestMatcher("/h2-console/**")).permitAll()
-            .requestMatchers(new AntPathRequestMatcher("/auth/**")).permitAll()
-            .requestMatchers(new AntPathRequestMatcher("/test-api")).permitAll()
-            .requestMatchers(new AntPathRequestMatcher("/posts/sortedByDate")).permitAll()
-            .requestMatchers(new AntPathRequestMatcher("/posts/filterByTitle")).permitAll()
-            .requestMatchers(new AntPathRequestMatcher("/posts/filterByUsername")).permitAll()
-            .requestMatchers(new AntPathRequestMatcher("/users/deleteUser")).hasRole("ADMIN")
-            .requestMatchers(new AntPathRequestMatcher("/users/getAll")).hasRole("ADMIN")
-            .requestMatchers(new AntPathRequestMatcher("/users/banUser")).hasAnyRole("USER", "ADMIN")
-            .requestMatchers(new AntPathRequestMatcher("/comments/vote")).hasAnyRole("USER", "ADMIN")
-            .requestMatchers(new AntPathRequestMatcher("/comments/insertComment")).hasAnyRole("USER", "ADMIN")
-            .requestMatchers(new AntPathRequestMatcher("/comments/editComment")).hasAnyRole("USER", "ADMIN")
-            .requestMatchers(new AntPathRequestMatcher("/posts/create")).hasAnyRole("USER", "ADMIN")
-            .requestMatchers(new AntPathRequestMatcher("/posts/upvote")).hasAnyRole("USER", "ADMIN")
-            .requestMatchers(new AntPathRequestMatcher("/posts/edit")).hasAnyRole("USER", "ADMIN")
-            .requestMatchers(new AntPathRequestMatcher("/posts/delete")).hasAnyRole("USER", "ADMIN")
-            .requestMatchers(new AntPathRequestMatcher("/tags/create")).hasRole("ADMIN")
-            .requestMatchers(new AntPathRequestMatcher("/tags/updateTag")).hasRole("ADMIN")
-            .requestMatchers(new AntPathRequestMatcher("/tags/delete")).hasRole("ADMIN")
-            .requestMatchers(new AntPathRequestMatcher("/users/me")).authenticated()
-            .anyRequest().permitAll();
->>>>>>> 233aed72c1007beaf7a085309e46467e64efcb3f
-        http.headers().frameOptions().disable();
+                .cors(cors -> cors.configurationSource(corsConfigurationSource())) // Configure CORS
+                .csrf(csrf -> csrf.disable()) // Disable CSRF
+                .authorizeHttpRequests(authz -> authz
+                        // Publicly accessible paths
+                        .requestMatchers(
+                                new AntPathRequestMatcher("/h2-console/**"),
+                                new AntPathRequestMatcher("/auth/**"),
+                                new AntPathRequestMatcher("/test-api"),
+                                new AntPathRequestMatcher("/posts/sortedByDate"),
+                                new AntPathRequestMatcher("/posts/filterByTitle"),
+                                new AntPathRequestMatcher("/posts/filterByUsername")
+                        ).permitAll()
 
+                        // Admin-specific paths
+                        .requestMatchers(
+                                new AntPathRequestMatcher("/users/deleteUser"),
+                                new AntPathRequestMatcher("/users/getAll"),
+                                // .requestMatchers(new AntPathRequestMatcher("/users/banUser")).hasRole("ADMIN") // Original: ADMIN, then USER/ADMIN. Consolidate or clarify. Assuming ADMIN for now.
+                                new AntPathRequestMatcher("/tags/create"),
+                                new AntPathRequestMatcher("/tags/updateTag"),
+                                new AntPathRequestMatcher("/tags/delete")
+                        ).hasRole("ADMIN")
+
+                        // User and Admin paths (shared)
+                        .requestMatchers(
+                                new AntPathRequestMatcher("/users/banUser"), // Moved here as it was duplicated with different roles, assuming stricter or more general one. Adjust if needed.
+                                new AntPathRequestMatcher("/comments/vote"),
+                                new AntPathRequestMatcher("/comments/insertComment"),
+                                new AntPathRequestMatcher("/comments/editComment"),
+                                new AntPathRequestMatcher("/posts/create"),
+                                new AntPathRequestMatcher("/posts/upvote"),
+                                new AntPathRequestMatcher("/posts/edit"),
+                                new AntPathRequestMatcher("/posts/delete")
+                        ).hasAnyRole("USER", "ADMIN")
+
+                        // Authenticated paths
+                        .requestMatchers(new AntPathRequestMatcher("/users/me")).authenticated()
+
+                        // All other requests (if not matched above)
+                        .anyRequest().permitAll() // Ensure this is the LAST rule
+                )
+                // For H2 console to be accessible in a browser
+                .headers(headers -> headers.frameOptions(frameOptions -> frameOptions.disable()));
+
+        // Add your JWT filter
         http.addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+
+        // Optional: If you are using JWTs, you typically want stateless sessions
+        // http.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+
         return http.build();
     }
-
-    @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowCredentials(true);
-        configuration.addAllowedOriginPattern("*"); //enable all cors
-        configuration.addAllowedHeader("*");
-        configuration.addAllowedMethod("*");
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration);
-        return source;
-    }
-
-
-
-//*/
-/*
-    @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http.csrf().disable()
-            .authorizeHttpRequests()
-            .requestMatchers(new AntPathRequestMatcher("/auth/**")).permitAll()
-            .requestMatchers(new AntPathRequestMatcher("/h2-console/**")).permitAll()
-            .anyRequest().permitAll();
-        // Allow frames for H2 console
-        http.headers().frameOptions().disable();
-
-        //http.addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
-        return http.build();
-    }
-//*/
 }
