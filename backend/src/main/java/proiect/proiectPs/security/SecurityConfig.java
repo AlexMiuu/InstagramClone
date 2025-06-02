@@ -50,28 +50,6 @@ public class SecurityConfig {
     //*
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http, HandlerMappingIntrospector introspector) throws Exception {
-<<<<<<< HEAD
-        http.csrf().disable()
-                .cors().configurationSource(corsConfigurationSource()) // Add CORS configuration
-                .and()
-                .authorizeHttpRequests()
-                .requestMatchers(new AntPathRequestMatcher("/h2-console/**")).permitAll()
-                .requestMatchers(new AntPathRequestMatcher("/auth/**")).permitAll()
-                .requestMatchers(new AntPathRequestMatcher("/users/deleteUser")).hasRole("ADMIN")
-                .requestMatchers(new AntPathRequestMatcher("/users/getAll")).hasRole("ADMIN")
-                .requestMatchers(new AntPathRequestMatcher("/users/banUser")).hasRole("ADMIN")
-                .requestMatchers(new AntPathRequestMatcher("/comments/vote")).hasAnyRole("USER", "ADMIN")
-                .requestMatchers(new AntPathRequestMatcher("/comments/insertComment")).hasAnyRole("USER", "ADMIN")
-                .requestMatchers(new AntPathRequestMatcher("/comments/editComment")).hasAnyRole("USER", "ADMIN")
-                .requestMatchers(new AntPathRequestMatcher("/posts/create")).hasAnyRole("USER", "ADMIN")
-                .requestMatchers(new AntPathRequestMatcher("/posts/upvote")).hasAnyRole("USER", "ADMIN")
-                .requestMatchers(new AntPathRequestMatcher("/posts/edit")).hasAnyRole("USER", "ADMIN")
-                .requestMatchers(new AntPathRequestMatcher("/posts/delete")).hasAnyRole("USER", "ADMIN")
-                .requestMatchers(new AntPathRequestMatcher("/tags/create")).hasRole("ADMIN")
-                .requestMatchers(new AntPathRequestMatcher("/tags/updateTag")).hasRole("ADMIN")
-                .requestMatchers(new AntPathRequestMatcher("/tags/delete")).hasRole("ADMIN")
-                .anyRequest().permitAll();
-=======
         http
             .cors() // Enable CORS support
             .and()
@@ -98,23 +76,11 @@ public class SecurityConfig {
             .requestMatchers(new AntPathRequestMatcher("/tags/delete")).hasRole("ADMIN")
             .requestMatchers(new AntPathRequestMatcher("/users/me")).authenticated()
             .anyRequest().permitAll();
->>>>>>> 233aed72c1007beaf7a085309e46467e64efcb3f
+
         http.headers().frameOptions().disable();
 
         http.addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
-    }
-
-    @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowCredentials(true);
-        configuration.addAllowedOriginPattern("*"); //enable all cors
-        configuration.addAllowedHeader("*");
-        configuration.addAllowedMethod("*");
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration);
-        return source;
     }
 
 
