@@ -51,53 +51,31 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception { // HandlerMappingIntrospector removed as it's not used
-        http
-                .cors(cors -> cors.configurationSource(corsConfigurationSource())) // Configure CORS
-                .csrf(csrf -> csrf.disable()) // Disable CSRF
-                .authorizeHttpRequests(authz -> authz
-                        // Publicly accessible paths
-                        .requestMatchers(
-                                new AntPathRequestMatcher("/h2-console/**"),
-                                new AntPathRequestMatcher("/auth/**"),
-                                new AntPathRequestMatcher("/test-api"),
-                                new AntPathRequestMatcher("/posts/sortedByDate"),
-                                new AntPathRequestMatcher("/posts/filterByTitle"),
-                                new AntPathRequestMatcher("/posts/filterByUsername")
-                        ).permitAll()
+    public SecurityFilterChain filterChain(HttpSecurity http, HandlerMappingIntrospector introspector) throws Exception {
+<<<<<<< HEAD
+        http.csrf().disable()
+                .cors().configurationSource(corsConfigurationSource()) // Add CORS configuration
+                .and()
+                .authorizeHttpRequests()
+                .requestMatchers(new AntPathRequestMatcher("/h2-console/**")).permitAll()
+                .requestMatchers(new AntPathRequestMatcher("/auth/**")).permitAll()
+                .requestMatchers(new AntPathRequestMatcher("/users/deleteUser")).hasRole("ADMIN")
+                .requestMatchers(new AntPathRequestMatcher("/users/getAll")).hasRole("ADMIN")
+                .requestMatchers(new AntPathRequestMatcher("/users/banUser")).hasRole("ADMIN")
+                .requestMatchers(new AntPathRequestMatcher("/comments/vote")).hasAnyRole("USER", "ADMIN")
+                .requestMatchers(new AntPathRequestMatcher("/comments/insertComment")).hasAnyRole("USER", "ADMIN")
+                .requestMatchers(new AntPathRequestMatcher("/comments/editComment")).hasAnyRole("USER", "ADMIN")
+                .requestMatchers(new AntPathRequestMatcher("/posts/create")).hasAnyRole("USER", "ADMIN")
+                .requestMatchers(new AntPathRequestMatcher("/posts/upvote")).hasAnyRole("USER", "ADMIN")
+                .requestMatchers(new AntPathRequestMatcher("/posts/edit")).hasAnyRole("USER", "ADMIN")
+                .requestMatchers(new AntPathRequestMatcher("/posts/delete")).hasAnyRole("USER", "ADMIN")
+                .requestMatchers(new AntPathRequestMatcher("/tags/create")).hasRole("ADMIN")
+                .requestMatchers(new AntPathRequestMatcher("/tags/updateTag")).hasRole("ADMIN")
+                .requestMatchers(new AntPathRequestMatcher("/tags/delete")).hasRole("ADMIN")
+                .anyRequest().permitAll();
 
-                        // Admin-specific paths
-                        .requestMatchers(
-                                new AntPathRequestMatcher("/users/deleteUser"),
-                                new AntPathRequestMatcher("/users/getAll"),
-                                // .requestMatchers(new AntPathRequestMatcher("/users/banUser")).hasRole("ADMIN") // Original: ADMIN, then USER/ADMIN. Consolidate or clarify. Assuming ADMIN for now.
-                                new AntPathRequestMatcher("/tags/create"),
-                                new AntPathRequestMatcher("/tags/updateTag"),
-                                new AntPathRequestMatcher("/tags/delete")
-                        ).hasRole("ADMIN")
+        http.headers().frameOptions().disable();
 
-                        // User and Admin paths (shared)
-                        .requestMatchers(
-                                new AntPathRequestMatcher("/users/banUser"), // Moved here as it was duplicated with different roles, assuming stricter or more general one. Adjust if needed.
-                                new AntPathRequestMatcher("/comments/vote"),
-                                new AntPathRequestMatcher("/comments/insertComment"),
-                                new AntPathRequestMatcher("/comments/editComment"),
-                                new AntPathRequestMatcher("/posts/create"),
-                                new AntPathRequestMatcher("/posts/upvote"),
-                                new AntPathRequestMatcher("/posts/edit"),
-                                new AntPathRequestMatcher("/posts/delete")
-                        ).hasAnyRole("USER", "ADMIN")
-
-                        // Authenticated paths
-                        .requestMatchers(new AntPathRequestMatcher("/users/me")).authenticated()
-
-                        // All other requests (if not matched above)
-                        .anyRequest().permitAll() // Ensure this is the LAST rule
-                )
-                // For H2 console to be accessible in a browser
-                .headers(headers -> headers.frameOptions(frameOptions -> frameOptions.disable()));
-
-        // Add your JWT filter
         http.addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         // Optional: If you are using JWTs, you typically want stateless sessions
